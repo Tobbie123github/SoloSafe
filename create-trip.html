@@ -215,8 +215,8 @@ form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const destination = destinationInput.value.trim();
-    const startDate = startDateInput.value;
-    const endDate = endDateInput.value;
+   const startDate = new Date(startDateInput.value).toISOString();
+const endDate = new Date(endDateInput.value).toISOString();
     const accommodation = accommodationInput.value.trim() || 'Not specified';
     const checkInFrequency = parseInt(checkInFrequencyInput.value);
 
@@ -228,13 +228,14 @@ form.addEventListener('submit', async (e) => {
 
     // Build payload matching backend schema
     const payload = {
-        destination,
-        startDate,
-        endDate,
-        accommodation,
-        checkInFrequency, // in hours
-        emergencyContacts: [] // Will be added later in emergency contacts page
-    };
+    destination,
+    startDate: new Date(startDateInput.value).toISOString(),
+    endDate: new Date(endDateInput.value).toISOString(),
+    accommodation,
+    checkInFrequency,
+    emergencyContacts: []
+};
+
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
