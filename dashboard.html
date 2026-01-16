@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Hamburger Menu Button (Mobile) -->
+    <button class="hamburger-btn" onclick="showSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <!-- <div class="logo-circle">SS</div>
+            <span class="brand-name sidebar-text" style="color: white;">SoloSafe</span> -->
+            <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+            <h4 class="fw-bolder font-color pt-2">SoloSafe</h4>
+            <button class="btn btn-sm btn-light d-none d-lg-block ms-auto" onclick="toggleSidebar()" title="Collapse">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li>
+                <a href="dashboard.html" class="active">
+                    <i class="fas fa-home"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="settings.html">
+                    <i class="fas fa-cog"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-danger" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h2 id="welcomeMessage">Welcome to SoloSafe</h2>
+                <p class="text-muted mb-0">Manage your trips and stay safe</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-primary" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-profile" onclick="toggleProfileDropdown()">
+                    <div style="position: relative;">
+                        <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" alt="Profile"
+                            class="profile-picture" id="headerProfilePic">
+                        <div class="online-indicator" id="onlineStatus"></div>
+                    </div>
+                    <div>
+                        <div class="fw-bold" id="headerUserName">User</div>
+                        <small class="text-muted" id="headerUserEmail">user@example.com</small>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+
+                    <!-- Profile Dropdown -->
+                    <div class="profile-dropdown">
+                        <a href="#" onclick="document.getElementById('profilePictureInput').click(); return false;">
+                            <i class="fas fa-camera"></i> Upload Picture
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr class="my-2">
+                        <a href="#" onclick="logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden file input for profile picture -->
+        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+
+        <!-- Welcome Message Banner -->
+        <div class="welcome-message" id="welcomeBanner">
+            <h1 id="welcomeText">Welcome!</h1>
+            <p id="welcomeSubtext">Start planning your next safe adventure</p>
+        </div>
+
+        <!-- Countdown Timer (if active trip exists) -->
+        <div id="countdownContainer" style="display: none;">
+            <div class="countdown-timer">
+                <h3>Next Check-in</h3>
+                <div class="time" id="countdownDisplay">00:00:00</div>
+                <p class="mb-0">Stay safe and check in on time!</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Active Trips</h3>
+                <div class="stat-value" id="activeTripsCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Upcoming Trips</h3>
+                <div class="stat-value" id="upcomingTripsCount" style="color: #ff9800;">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Completed Trips</h3>
+                <div class="stat-value" id="completedTripsCount" style="color: #00cc66;">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Emergency Contacts</h3>
+                <div class="stat-value" id="contactsCount" style="color: #0066ff;">0</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Quick Actions</h5>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="create-trip.html" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Create New Trip
+                            </a>
+                            
+                            <button class="btn btn-outline-secondary" onclick="requestNotificationPermission()">
+                                <i class="fas fa-bell me-2"></i>Enable Notifications
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Trips -->
+        <div class="mb-4">
+            <h4 class="mb-3">Active Trips</h4>
+            <div id="activeTripsContainer">
+                <p class="text-muted">No active trips. Create one to get started!</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Trips -->
+        <div class="mb-4">
+            <h4 class="mb-3">Upcoming Trips</h4>
+            <div id="upcomingTripsContainer">
+                <p class="text-muted">No upcoming trips.</p>
+            </div>
+        </div>
+
+        <!-- Past Trips -->
+        <div class="mb-4">
+            <h4 class="mb-3">Completed Trips</h4>
+            <div id="completedTripsContainer">
+                <p class="text-muted">No completed trips yet.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="script.js"></script>
+    <script>
+(async function() {
+    // Get the logged-in user
+    const user = getCurrentUser();
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }else{
+        //add user in local storage
+        localStorage.setItem('solosafe_user', JSON.stringify(user));    
+    }
+
+    // Set user info in header
+    document.getElementById('headerUserName').textContent = user.name || user.username;
+    document.getElementById('headerUserEmail').textContent = user.email;
+    document.getElementById('welcomeMessage').textContent = getWelcomeMessage();
+    document.getElementById('welcomeText').textContent = getWelcomeMessage();
+    if (user.profilePicture) {
+        document.getElementById('headerProfilePic').src = user.profilePicture;
+    }
+
+    // Profile picture upload
+    document.getElementById('profilePictureInput').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const dataURL = await uploadProfilePicture(file);
+            document.getElementById('headerProfilePic').src = dataURL;
+            showToast('Profile picture updated', 'success');
+        } catch (err) {
+            showToast('Failed to upload picture', 'error');
+        }
+    });
+
+    // Fetch trips from backend
+    let trips = [];
+    try {
+        const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        trips = await response.json();
+    } catch (err) {
+        console.error('Failed to fetch trips:', err);
+        showToast('Failed to load trips', 'error');
+        trips = [];
+    }
+
+    //save trips to local storage
+    console.log('Saving trips to local storage:', trips);
+    localStorage.setItem('solosafe_trips', JSON.stringify(trips));
+
+    const now = new Date();
+
+    // Categorize trips
+    // const activeTrips = trips.filter(t => t.status === 'Safe' || t.status === 'Missed Check-in' || t.status === 'SOS');
+  // active trips
+ let activeTrips = trips.filter(t => {
+  let start = new Date(t.startDate);
+  let end = new Date(t.endDate);
+
+  return (
+    start <= now &&
+    now <= end &&
+    t.status !== 'Completed'
+  );
+});
+
+
+    
+    const upcomingTrips = trips.filter(t => new Date(t.startDate) > now);
+   const completedTrips = trips.filter(
+  t => new Date(t.endDate) < now || t.status === 'Completed'
+);
+    console.log('Completed Trips:', completedTrips);
+    // Flatten all emergency contacts
+    const allContacts = trips.flatMap(t => t.emergencyContacts || []);
+
+    // Update dashboard stats
+    document.getElementById('activeTripsCount').textContent = activeTrips.length;
+    document.getElementById('upcomingTripsCount').textContent = upcomingTrips.length;
+    document.getElementById('completedTripsCount').textContent = completedTrips.length;
+    document.getElementById('contactsCount').textContent = allContacts.length;
+
+    // Render trips
+    function renderTrips(tripsList, containerId) {
+        const container = document.getElementById(containerId);
+        if (!tripsList.length) {
+            container.innerHTML = '<p class="text-muted">No trips found.</p>';
+            return;
+        }
+
+        container.innerHTML = tripsList.map(trip => `
+            <div class="trip-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="mb-1">${trip.destination}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-calendar me-2"></i>
+                            ${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}
+                        </p>
+                    </div>
+                    <span class="trip-status ${trip.status}">${trip.status.toUpperCase()}</span>
+                </div>
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Check-in Interval:</strong> ${trip.checkInFrequency} ${trip.checkInFrequency === 1 ? 'minute' : 'minutes'}</p>
+                    <p class="mb-1"><strong>Emergency Contacts:</strong> ${(trip.emergencyContacts || []).length}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    ${trip.status === 'Safe' || trip.status === 'Missed Check-in' || trip.status === 'SOS' ? `
+                        <a href="active-trip.html?id=${trip._id}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i>View Trip
+                        </a>
+                    ` : new Date(trip.startDate) > now ? `
+                        <a href="create-trip.html?id=${trip._id}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                    ` : `
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewTripDetails('${trip._id}')">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </button>
+                    `}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderTrips(activeTrips, 'activeTripsContainer');
+    renderTrips(upcomingTrips, 'upcomingTripsContainer');
+    renderTrips(completedTrips, 'completedTripsContainer');
+
+
+
+    // Countdown for first active trip
+    const activeTrip = activeTrips[0];
+    if (activeTrip && activeTrip.nextCheckIn) {
+        const countdownContainer = document.getElementById('countdownContainer');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        countdownContainer.style.display = 'block';
+
+        function updateCountdown() {
+            const nowTime = Date.now();
+            const nextCheckIn = new Date(activeTrip.nextCheckIn).getTime();
+            const diff = nextCheckIn - nowTime;
+
+            if (diff <= 0) {
+                countdownDisplay.textContent = 'CHECK IN NOW!';
+                countdownDisplay.style.color = '#ff4444';
+                sendNotification('Check-in Required', 'Please confirm you are safe!');
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            countdownDisplay.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+})();
+</script>
+
+<script>
+    function viewTripDetails(tripId) {
+  window.location.href = `trip-details.html?id=${tripId}`;
+}
+</script>
+
+</body>
+
+</html>

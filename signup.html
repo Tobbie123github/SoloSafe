@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="row g-0 h-100">
+            <!-- LEFT SIDE - Image Carousel -->
+            <div class="col-lg-6 auth-image-side">
+                <div class="carousel-overlay"></div>
+                <div id="signupCarousel" class="carousel slide carousel-fade h-100" data-bs-ride="carousel">
+                    <div class="carousel-inner h-100">
+                        <div class="carousel-item active h-100">
+                            <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800"
+                                class="d-block w-100 h-100 carousel-image" alt="Solo Travel">
+                        </div>
+                        <div class="carousel-item h-100">
+                            <img src="https://images.unsplash.com/photo-1488646953014-85c470247498?w=800"
+                                class="d-block w-100 h-100 carousel-image" alt="Adventure">
+                        </div>
+                        <div class="carousel-item h-100">
+                            <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800"
+                                class="d-block w-100 h-100 carousel-image" alt="Explore">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-text">
+                    <h2>Travel Solo with Confidence</h2>
+                    <p>Join thousands of adventurers exploring the world safely with SoloSafe</p>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE - Sign Up Form -->
+            <div class="col-lg-6 auth-form-side">
+                <div class="auth-form-container">
+                    <div class="text-center mb-4">
+                        <!-- <div class="logo-circle mx-auto mb-3">SS</div> -->
+                        <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                        <!-- <h4 class="fw-bolder font-color pt-2">SoloSafe</h4> -->
+                        <h2>Get Started with SoloSafe</h2>
+                        <p class="text-muted">Create your account to start your safe journey</p>
+                    </div>
+
+                    <form id="signupForm">
+                      
+                        <!-- name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name"
+                            placeholder="John Doe"
+                                required>
+                            <div class="invalid-feedback" id="nameerr"></div>
+                        </div>
+                      
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" placeholder="your.email@example.com"
+                                required>
+                            <div class="invalid-feedback" id="emailError"></div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password"
+                                    placeholder="At least 6 characters" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback" id="passwordError"></div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 mb-3" id="signupBtn" disabled>Sign
+                            Up</button>
+
+                        <!-- Divider -->
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
+                        <!-- Google Sign Up -->
+                        <!-- <button type="button" class="btn btn-outline-secondary w-100 google-btn" id="googleSignup">
+                            <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
+                            Sign up with Google
+                        </button> -->
+
+                        <!-- Login Link -->
+                        <div class="text-center mt-4">
+                            <p class="text-muted">Already have an account? <a href="login.html">Log in</a></p>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="index.html" class="text-muted">← Back to home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="script.js"></script>
+    <script>
+
+         const user = getCurrentUser();
+
+        if (user) {
+            window.location.href = 'dashboard.html';
+        }
+        
+        const form = document.getElementById('signupForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const termsCheckbox = document.getElementById('terms');
+        const signupBtn = document.getElementById('signupBtn');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const googleSignupBtn = document.getElementById('googleSignup');
+        const name = document.getElementById('name');
+
+        // Enable/disable submit button
+        function checkFormValidity() {
+            const isValid = emailInput.value.trim() !== '' &&
+                passwordInput.value.trim() !== '' &&
+                termsCheckbox.checked;
+            signupBtn.disabled = !isValid;
+        }
+
+        emailInput.addEventListener('input', checkFormValidity);
+        passwordInput.addEventListener('input', checkFormValidity);
+        termsCheckbox.addEventListener('change', checkFormValidity);
+
+        // Toggle password visibility
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye');
+            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+        
+        function setButtonLoading(button, text = 'Loading...') {
+    button.disabled = true;
+    button.dataset.originalText = button.innerHTML;
+
+    button.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        ${text}
+    `;
+    button.classList.add('btn-spinner');
+}
+
+function resetButton(button) {
+    button.disabled = false;
+    if (button.dataset.originalText) {
+        button.innerHTML = button.dataset.originalText;
+    }
+    button.classList.remove('btn-spinner');
+}
+        
+        
+
+        // Form submission
+        
+        form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const nameValue = name.value.trim()
+    
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        emailInput.classList.add('is-invalid');
+        document.getElementById('emailError').textContent = 'Please enter a valid email address';
+        return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+        passwordInput.classList.add('is-invalid');
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+        return;
+    }
+
+    // Check if email already exists locally
+    const users = JSON.parse(localStorage.getItem('solosafe_users') || '[]');
+    if (users.some(u => u.email === email)) {
+        emailInput.classList.add('is-invalid');
+        document.getElementById('emailError').textContent = 'This email is already registered. Please login.';
+        showToast('Email already exists. Please login instead.', 'error');
+        return;
+    }
+
+    // Show spinner on button
+    setButtonLoading(signupBtn, 'Creating account...');
+
+    try {
+    const response = await fetch('https://solosafe-backend.onrender.com/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name: nameValue, email, password })
+    });
+    
+    console.log("res", response);
+    console.error(response);
+
+    if (!response.ok) {
+        let errorMessage = 'Signup failed';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch {
+            // fallback if response is not JSON
+            const text = await response.text();
+            errorMessage = text || errorMessage;
+        }
+        showToast(errorMessage, 'error');
+        return;
+    }
+
+    showToast('Verification email sent! Check your inbox.', 'success');
+
+    localStorage.setItem('solosafe_temp_signup', JSON.stringify({ email, password, timestamp: Date.now() }));
+
+    setTimeout(() => {
+        window.location.href = 'verify-email.html';
+    }, 1500);
+
+} catch (err) {
+    console.error(err);
+    showToast('Network error. Please try again.', 'error');
+} finally {
+    resetButton(signupBtn);
+}
+});
+        
+
+        // Google OAuth Sign Up
+        googleSignupBtn.addEventListener('click', () => {
+    showToast('Redirecting to Google...', 'info');
+    // Google OAuth will handle session creation automatically
+    setTimeout(() => {
+        window.location.href = 'https://solosafe-backend.onrender.com/api/auth/google';
+    }, 1000);
+});
+
+        // Initialize carousel with 4-second interval
+        const carousel = new bootstrap.Carousel(document.getElementById('signupCarousel'), {
+            interval: 4000,
+            ride: 'carousel'
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,930 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Trip - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-btn" onclick="showSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <!-- <div class="logo-circle">SS</div>
+            <span class="brand-name sidebar-text" style="color: white;">SoloSafe</span> -->
+            <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+            <h4 class="fw-bolder font-color pt-2">SoloSafe</h4>
+            <button class="btn btn-sm btn-light d-none d-lg-block ms-auto" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li>
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+           
+            <li>
+                <a href="settings.html">
+                    <i class="fas fa-cog"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-danger" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="dashboard-header">
+            <div>
+                <h2 id="tripTitle">Active Trip</h2>
+                <p class="text-muted mb-0" id="tripDates">Loading...</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-primary" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="dashboard.html" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-timer mb-4">
+            <h3>Next Check-in Required</h3>
+            <div class="time" id="countdownDisplay">00:00:00</div>
+            <p class="mb-0">Stay safe and check in on time!</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Trip Details Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Trip Details
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Destination:</strong>
+                                <p class="mb-0" id="tripDestination">-</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Duration:</strong>
+                                <p class="mb-0" id="tripDuration">-</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Check-in Interval:</strong>
+                                <p class="mb-0" id="tripInterval">-</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Grace Period:</strong>
+                                <p class="mb-0" id="tripGrace">-</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Status:</strong>
+                                <p class="mb-0" id="tripStatus">-</p>
+                            </div>
+                        </div>
+                        <div id="tripDescriptionContainer" style="display: none;">
+                            <strong>Description:</strong>
+                            <p class="mb-0" id="tripDescription">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Actions Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-shield-alt me-2"></i>Safety Actions
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-success w-100 py-3" onclick="performCheckIn()">
+                                    <i class="fas fa-check-circle fa-2x d-block mb-2"></i>
+                                    <strong>I'm Safe</strong>
+                                    <br><small>Confirm your safety</small>
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-danger w-100 py-3"
+                                    onclick="handleSOSClick()">
+                                    <i class="fas fa-exclamation-triangle fa-2x d-block mb-2"></i>
+                                    <strong>Trigger SOS Alert</strong>
+                                    <br><small>Emergency assistance</small>
+                                </button>
+                            </div>
+
+                            <div class="col-md-6" id="removeSOSContainer" style="display: none;">
+    <button class="btn btn-primary w-100 py-3" onclick="cancelSOS()">
+        <i class="fas fa-exclamation-triangle fa-2x d-block mb-2"></i>
+        <strong>Remove SOS</strong>
+        <br><small>Emergency assistance</small>
+    </button>
+</div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Tracking Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-map-pin me-2"></i>Location Tracking
+                        </h5>
+                        <div id="locationDisabled">
+                            <p class="text-muted">Enable location tracking to share your real-time location with
+                                emergency contacts.</p>
+                            <button class="btn btn-primary" onclick="startLocationTracking()">
+                                <i class="fas fa-location-arrow me-2"></i>Enable Location Tracking
+                            </button>
+                        </div>
+                        <div id="locationEnabled" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>Location tracking is active
+                            </div>
+                            <div class="mb-2">
+                                <strong>Current Location:</strong>
+                                <p class="mb-0" id="currentLocation">Getting location...</p>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Last Updated:</strong>
+                                <p class="mb-0" id="lastUpdated">-</p>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="disableLocationTracking()">
+                                <i class="fas fa-times me-1"></i>Disable
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Emergency Contacts Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-user-friends me-2"></i>Emergency Contacts
+                        </h5>
+                        <div id="contactsList">
+                            <p class="text-muted">No emergency contacts added yet.</p>
+                        </div>
+                       <a id="addEmergencyContactBtn"
+   class="btn btn-outline-primary btn-sm w-100 mt-2">
+    <i class="fas fa-plus me-1"></i>Add Contact
+</a>
+
+                    </div>
+                </div>
+
+                <!-- Share Itinerary Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-share-alt me-2"></i>Share Itinerary
+                        </h5>
+                        <p class="text-muted small">Share your trip details with family and friends</p>
+                        <button class="btn btn-info w-100" onclick="shareItinerary()">
+                            <i class="fas fa-link me-2"></i>Generate Share Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- End Trip Card -->
+                <div class="card border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger mb-3">
+                            <i class="fas fa-stop-circle me-2"></i>End Trip
+                        </h5>
+                        <p class="text-muted small">Complete your trip when you've safely reached your destination</p>
+                        <button class="btn btn-danger w-100" onclick="confirmEndTrip()">
+                            <i class="fas fa-flag-checkered me-2"></i>End Trip
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SOS Alert Modal -->
+    <div class="modal fade" id="sosModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger" style="border-width: 3px;">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>EMERGENCY ALERT
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-4"
+                    style="background: linear-gradient(135deg, rgba(255, 68, 68, 0.05), rgba(255, 107, 107, 0.05));">
+                    <div class="sos-icon mb-3">
+                        <i class="fas fa-exclamation-circle" style="font-size: 64px; color: #ff4444;"></i>
+                    </div>
+                    <h4 class="mb-3">Are you sure you want to trigger an SOS alert?</h4>
+                    <div class="alert alert-warning text-start">
+                        <h6 class="mb-2"><strong>⚠️ This will immediately:</strong></h6>
+                        <ul class="mb-0 ps-3">
+                            <li>Send emergency alerts to ALL your emergency contacts</li>
+                            <li>Share your current GPS location in real-time</li>
+                            <li>Notify contacts via email with urgent assistance request</li>
+                            <li>Mark your trip status as "EMERGENCY"</li>
+                            <li>Enable continuous location tracking</li>
+                        </ul>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <strong>Only trigger SOS if you are in genuine danger or need immediate help.</strong>
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger px-4" onclick="confirmSOS()">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Yes, Send SOS Alert
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-in Success Modal -->
+    <div class="modal fade" id="checkinModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success" style="border-width: 3px;">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Check-in Successful
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div class="success-icon mb-3">
+                        <i class="fas fa-check-circle" style="font-size: 64px; color: #00cc66;"></i>
+                    </div>
+                    <h4 class="mb-3">You're all set!</h4>
+                    <p class="text-muted">Your emergency contacts have been notified that you're safe.</p>
+                    <div class="alert alert-info text-start">
+                        <strong>Next check-in:</strong>
+                        <p class="mb-0" id="nextCheckinTime">-</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="script.js"></script>
+
+<script>
+    // ========================
+    // INITIALIZATION
+    // ========================
+    const user = getCurrentUser();
+    if (!user) {
+        window.location.href = 'login.html';
+    }
+
+    // Get trip ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('id');
+
+    if (!tripId) {
+        showToast('No trip ID provided', 'error');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    }
+
+    // Load trip from localStorage
+    const trips = JSON.parse(localStorage.getItem('solosafe_trips') || '[]');
+    const trip = trips.find(t => t._id === tripId);
+
+    function hasEmergencyContacts() {
+    return (
+        trip &&
+        Array.isArray(trip.emergencyContacts) &&
+        trip.emergencyContacts.length > 0
+    );
+}
+
+
+    if (!trip) {
+        showToast('Trip not found', 'error');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    }
+
+    // Set emergency contact button link
+    const addContactBtn = document.getElementById('addEmergencyContactBtn');
+    if (addContactBtn && trip) {
+        addContactBtn.href = `emergency-contacts.html?tripId=${trip._id}&userId=${trip.userId}`;
+    }
+
+    // ========================
+    // DISPLAY TRIP DETAILS
+    // ========================
+    if (trip) {
+        document.getElementById('tripTitle').textContent = trip.destination;
+        document.getElementById('tripStatus').textContent = trip.status || 'SAFE';
+        document.getElementById('tripDates').textContent =
+            `${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`;
+        document.getElementById('tripDestination').textContent = trip.destination;
+
+        const startDate = new Date(trip.startDate);
+        const endDate = new Date(trip.endDate);
+        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        document.getElementById('tripDuration').textContent = `${duration} day${duration > 1 ? 's' : ''}`;
+
+        document.getElementById('tripInterval').textContent = `${trip.checkInFrequency} minute${trip.checkInFrequency > 1 ? 's' : ''}`;
+        document.getElementById('tripGrace').textContent = `${trip.gracePeriod || 30} minutes`;
+
+        if (trip.accommodation && trip.accommodation !== 'Not specified') {
+            document.getElementById('tripDescriptionContainer').style.display = 'block';
+            document.getElementById('tripDescription').textContent = trip.accommodation;
+        }
+
+        // Display emergency contacts
+        if (trip.emergencyContacts && trip.emergencyContacts.length > 0) {
+            document.getElementById('contactsList').innerHTML = trip.emergencyContacts.map(contact => `
+                <div class="mb-2 p-2 border rounded">
+                    <strong>${contact.name}</strong>
+        
+                    <br><small>${contact.email}</small>
+                    ${contact.phone ? `<br><small>${contact.phone}</small>` : ''}
+                </div>
+            `).join('');
+        }
+    }
+
+    // ========================
+    // COUNTDOWN TIMER
+    // ========================
+    function updateCountdown() {
+        if (!trip || !trip.nextCheckIn) {
+            document.getElementById('countdownDisplay').textContent = '--:--:--';
+            return;
+        }
+
+        const now = Date.now();
+        const nextCheckIn = new Date(trip.nextCheckIn).getTime();
+        const timeLeft = nextCheckIn - now;
+
+        if (timeLeft <= 0) {
+            document.getElementById('countdownDisplay').textContent = 'CHECK IN NOW!';
+            document.getElementById('countdownDisplay').style.color = '#ff4444';
+
+            if (!trip.graceStarted) {
+                startGracePeriod();
+            }
+            return;
+        }
+
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        document.getElementById('countdownDisplay').textContent =
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Grace Period
+    function startGracePeriod() {
+        trip.graceStarted = true;
+        const gracePeriod = trip.gracePeriod || 30;
+        const graceEnd = Date.now() + (gracePeriod * 60 * 1000);
+        let reminders = 0;
+
+        showToast('Grace period started! Please check in.', 'warning');
+
+        window.graceInterval = setInterval(() => {
+            const timeLeft = graceEnd - Date.now();
+            
+            if (timeLeft <= 0) {
+                clearInterval(window.graceInterval);
+                //confirmSOS(true); // Auto-trigger SOS
+                if (hasEmergencyContacts()) {
+    confirmSOS(true);
+} else {
+    showToast(
+        'Grace period ended, but SOS was not sent because no emergency contacts exist.',
+        'warning'
+    );
+}
+                showToast('Grace period expired - SOS triggered automatically!', 'danger');
+            } else if (reminders < 3) {
+                const minutesLeft = Math.floor(timeLeft / 60000);
+                showToast(`⚠️ Check in now! ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''} remaining`, 'warning');
+                
+                if (Notification.permission === 'granted') {
+                    new Notification('URGENT: Check-in Required', {
+                        body: `${minutesLeft} minutes remaining before automatic SOS`,
+                        requireInteraction: true
+                    });
+                }
+                reminders++;
+            }
+        }, 60000); // Every minute
+    }
+
+    // Start countdown
+    if (trip) {
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    // ========================
+    // CHECK-IN FUNCTION
+    // ========================
+    let sosInProgress = false;
+
+    async function performCheckIn() {
+        if (!trip) {
+            showToast('Trip data not found', 'error');
+            return;
+        }
+
+        try {
+            // Get current location (optional)
+            let location = null;
+            try {
+                const pos = await getCurrentLocation();
+                location = {
+                    latitude: pos.lat,
+                    longitude: pos.lng
+                };
+            } catch (err) {
+                console.warn('Location unavailable:', err);
+            }
+
+            // Call backend API
+            const response = await fetch(
+                `https://solosafe-backend.onrender.com/api/trips/${trip._id}/safe`,
+                {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        latitude: location?.latitude || null,
+                        longitude: location?.longitude || null
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Check-in failed');
+            }
+
+            const data = await response.json();
+            console.log('✅ Check-in Response:', data);
+
+            // Update local trip data
+            trip.status = 'SAFE';
+            trip.lastCheckIn = new Date().toISOString();
+            trip.nextCheckIn = data.nextCheckIn || calculateNextCheckIn(trip);
+            trip.graceStarted = false;
+
+            // Stop grace period if active
+            if (window.graceInterval) {
+                clearInterval(window.graceInterval);
+                window.graceInterval = null;
+            }
+
+            // Update localStorage
+            const trips = JSON.parse(localStorage.getItem('solosafe_trips') || '[]');
+            const index = trips.findIndex(t => t._id === trip._id);
+            if (index > -1) {
+                trips[index] = trip;
+                localStorage.setItem('solosafe_trips', JSON.stringify(trips));
+            }
+
+            // Show success message
+            showToast('Check-in successful! ✅', 'success');
+            sendNotification('Check in successful ✅', `Youve checked in successfully at ${new Date().toLocaleTimeString()}`);
+            
+            // Update next check-in display
+            document.getElementById('nextCheckinTime').textContent = 
+                new Date(trip.nextCheckIn).toLocaleString();
+
+            // Show success modal
+            const modal = new bootstrap.Modal(document.getElementById('checkinModal'));
+            modal.show();
+
+            // Browser notification
+            if (Notification.permission === 'granted') {
+                new Notification('Check-in Successful', {
+                    body: 'Your contacts have been notified that you\'re safe',
+                    icon: '/favicon.ico'
+                });
+            }
+
+        } catch (error) {
+            console.error('❌ Check-in error:', error);
+            showToast(error.message || 'Failed to check in. Please try again.', 'error');
+        }
+    }
+
+    // Helper function
+    function calculateNextCheckIn(trip) {
+        const now = Date.now();
+        const intervalHours = trip.checkInFrequency || 24;
+        return new Date(now + (intervalHours * 60 * 60 * 1000)).toISOString();
+    }
+
+    // ========================
+    // SOS FUNCTION
+    // ========================
+    async function confirmSOS(auto = false) {
+        if (sosInProgress) {
+            console.log('SOS already in progress');
+            return;
+        }
+        
+        sosInProgress = true;
+
+        const sosBtn = document.querySelector('#sosModal .btn-danger');
+        const originalHTML = sosBtn?.innerHTML || '';
+        
+        if (sosBtn) {
+            sosBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Sending SOS...`;
+            sosBtn.disabled = true;
+        }
+
+        try {
+            // 1. Get GPS location (fallback-safe)
+            let location = { latitude: null, longitude: null };
+            
+            try {
+                const pos = await getCurrentLocation();
+                location = {
+                    latitude: pos.lat,
+                    longitude: pos.lng
+                };
+                console.log('📍 Location obtained:', location);
+            } catch (err) {
+                console.warn('⚠️ GPS unavailable, sending SOS without location:', err);
+            }
+
+            // 2. Send SOS to backend
+            // console.log('🚨 Sending SOS request to:', `https://solosafe-backend.onrender.com/api/alerts/sos`);
+            // console.log('🚨 Payload:', { tripId: tripId, ...location });
+            
+            const response = await fetch(
+                'https://solosafe-backend.onrender.com/api/alerts/sos',
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tripId: tripId,
+                        latitude: location.latitude,
+                        longitude: location.longitude
+                    })
+                }
+            );
+
+            console.log('🚨 Response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('❌ SOS Error Response:', errorData);
+                throw new Error(errorData.message || 'SOS request failed');
+            }
+
+            const data = await response.json();
+            console.log('✅ SOS Response:', data);
+
+            // 3. Update local trip status
+            trip.status = 'EMERGENCY';
+            trip.sosTriggered = true;
+            trip.sosTimestamp = new Date().toISOString();
+            trip.sosLocation = location;
+
+            
+
+            // Update localStorage
+            const trips = JSON.parse(localStorage.getItem('solosafe_trips') || '[]');
+            const index = trips.findIndex(t => t._id === trip._id);
+            if (index !== -1) {
+                trips[index] = trip;
+                localStorage.setItem('solosafe_trips', JSON.stringify(trips));
+            }
+
+            // 4. Start continuous location tracking
+            startContinuousTracking();
+
+            // 5. Show success feedback
+            const message = auto 
+                ? '🚨 Automatic SOS triggered! Emergency contacts notified.'
+                : '🚨 SOS alert sent! Emergency contacts have been notified.';
+            
+            showToast(message, 'warning');
+
+            // 6. Browser notification
+            if (Notification.permission === 'granted') {
+                new Notification('🚨 SOS Alert Sent', {
+                    body: 'Emergency contacts have been notified. Help is on the way.',
+                    icon: '/favicon.ico',
+                    requireInteraction: true
+                });
+            }
+
+            // 7. Close modal
+            const modalEl = document.getElementById('sosModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+
+            // 8. Update UI
+            updateUIForEmergency();
+
+        } catch (err) {
+            console.error('❌ SOS error:', err);
+            showToast(err.message || 'Failed to send SOS. Please try again.', 'error');
+        } finally {
+            sosInProgress = false;
+            if (sosBtn) {
+                sosBtn.disabled = false;
+                sosBtn.innerHTML = originalHTML;
+            }
+        }
+    }
+
+    // =====================
+    // CANCEL SOS FUNCTION
+    // =====================
+
+
+    let cancelInProgress = false;
+
+async function cancelSOS() {
+    if (cancelInProgress) return;
+
+    cancelInProgress = true;
+    const btn = document.querySelector('#removeSOSContainer button');
+    const originalHTML = btn.innerHTML;
+
+    try {
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Cancelling SOS...`;
+        btn.disabled = true;
+
+        const response = await fetch(
+            'https://solosafe-backend.onrender.com/api/alerts/cancel-sos',
+            {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tripId: tripId })
+            }
+        );
+
+        console.log('🚨 Cancel SOS response status:', response);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to cancel SOS');
+        }
+
+        // Update local trip status
+        trip.status = 'SAFE';
+        trip.sosTriggered = false;
+
+        const trips = JSON.parse(localStorage.getItem('solosafe_trips') || '[]');
+        const index = trips.findIndex(t => t._id === trip._id);
+        if (index !== -1) {
+            trips[index] = trip;
+            localStorage.setItem('solosafe_trips', JSON.stringify(trips));
+        }
+
+        showToast('✅ SOS cancelled successfully', 'success');
+
+        // Hide Remove SOS button
+        updateSOSButtonVisibility();
+
+    } catch (err) {
+        console.error('❌ Cancel SOS error:', err);
+        showToast(err.message || 'Failed to cancel SOS', 'error');
+    } finally {
+        cancelInProgress = false;
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+}
+
+
+
+
+    // ========================
+    // CONTINUOUS TRACKING
+    // ========================
+    let trackingInterval = null;
+
+    function startContinuousTracking() {
+        console.log('🔄 Starting continuous location tracking...');
+        
+        if (trackingInterval) clearInterval(trackingInterval);
+
+        trackingInterval = setInterval(async () => {
+            try {
+                const pos = await getCurrentLocation();
+                console.log('📍 Location update:', pos);
+                
+                const res = await fetch(
+                    "https://solosafe-backend.onrender.com/api/alerts/sos",
+                    {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                        tripId: tripId,
+                        latitude: pos.latitude,
+                        longitude: pos.longitude
+                    })
+                    }
+
+
+                );
+                console.log('✅ Location update sent:', res.status);
+                
+
+            } catch (err) {
+                console.error('Tracking error:', err);
+            }
+        }, 10000); // Every 10 seconds
+    }
+
+    function updateUIForEmergency() {
+        const countdown = document.getElementById('countdownDisplay');
+        if (countdown) {
+            countdown.textContent = '🚨 EMERGENCY MODE';
+            countdown.style.color = '#ff0000';
+            countdown.style.fontWeight = 'bold';
+        }
+
+        const checkinBtn = document.querySelector('.btn-success');
+        if (checkinBtn) {
+            checkinBtn.disabled = true;
+            checkinBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Emergency Mode Active';
+        }
+    }
+
+    // ========================
+    // LOCATION TRACKING UI
+    // ========================
+    async function startLocationTrackingUI() {
+        try {
+            startLocationTracking();
+            document.getElementById('locationDisabled').style.display = 'none';
+            document.getElementById('locationEnabled').style.display = 'block';
+            updateLocationDisplay();
+            setInterval(updateLocationDisplay, 10000);
+        } catch (err) {
+            showToast('Failed to enable location tracking', 'error');
+        }
+    }
+
+    function disableLocationTracking() {
+        stopLocationTracking();
+        document.getElementById('locationDisabled').style.display = 'block';
+        document.getElementById('locationEnabled').style.display = 'none';
+    }
+
+    async function updateLocationDisplay() {
+        try {
+            const pos = await getCurrentLocation();
+            document.getElementById('currentLocation').textContent = 
+                `Lat: ${pos.lat.toFixed(6)}, Lng: ${pos.lng.toFixed(6)}`;
+            document.getElementById('lastUpdated').textContent = 
+                new Date().toLocaleTimeString();
+        } catch (err) {
+            document.getElementById('currentLocation').textContent = 'Location unavailable';
+        }
+    }
+
+    // ========================
+    // OTHER FUNCTIONS
+    // ========================
+    function shareItinerary() {
+        if (!trip) return;
+        generateShareLink(tripId); // 7 days
+    }
+
+    async function confirmEndTrip() {
+        const confirmed = confirm(
+            'Are you sure you want to end this trip?\n\n' +
+            'This will stop all check-in reminders and mark the trip as completed.'
+        );
+        
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(
+                `https://solosafe-backend.onrender.com/api/trips/${trip._id}/end`,
+                {
+                    method: 'PUT',
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to end trip');
+            }
+
+            showToast('Trip completed successfully! 🎉', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
+
+        } catch (err) {
+            console.error('End trip error:', err);
+            showToast(err.message || 'Failed to end trip', 'error');
+        }
+    }
+
+    // Make functions global
+    window.performCheckIn = performCheckIn;
+    window.confirmSOS = confirmSOS;
+    window.startLocationTrackingUI = startLocationTrackingUI;
+    window.disableLocationTracking = disableLocationTracking;
+    window.shareItinerary = shareItinerary;
+    window.confirmEndTrip = confirmEndTrip;
+    window.cancelSOS = cancelSOS;
+</script>
+
+<script>
+    function handleSOSClick() {
+    if (!hasEmergencyContacts()) {
+        showToast(
+            '⚠️ Add at least one emergency contact to enable SOS.',
+            'error'
+        );
+        return;
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('sosModal'));
+    modal.show();
+}
+
+
+function updateSOSButtonVisibility() {
+    const removeSOSContainer = document.getElementById('removeSOSContainer');
+    if (!trip || !removeSOSContainer) return;
+
+    // Show button only if trip.status is EMERGENCY/SOS
+    if (trip.status === 'EMERGENCY' || trip.status === 'SOS') {
+        removeSOSContainer.style.display = 'block';
+    } else {
+        removeSOSContainer.style.display = 'none';
+    }
+}
+
+// Call once after trip is loaded
+updateSOSButtonVisibility();
+
+
+
+
+</script>
+
+</body>
+
+</html>

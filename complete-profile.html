@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <!-- <div class="logo-circle mx-auto mb-3">SS</div> -->
+                            <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                            <h4 class="fw-bolder font-color pt-2">SoloSafe</h4>
+                            <h2>Complete Your Profile</h2>
+                            <p class="text-muted">Tell us a bit about yourself</p>
+                        </div>
+
+                        <form id="profileForm">
+                            <!-- Full Name -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" placeholder="John Doe" required>
+                                <div class="invalid-feedback" id="nameError"></div>
+                            </div>
+
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" placeholder="johndoe" required>
+                                <small class="text-muted">3-20 characters, letters, numbers, and underscore only</small>
+                                <div class="invalid-feedback" id="usernameError"></div>
+                            </div>
+
+                            <!-- Country -->
+                            <div class="mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <select class="form-select" id="country" required>
+                                    <option value="">Select your country</option>
+                                    <option value="United States" data-code="+1">United States (+1)</option>
+                                    <option value="United Kingdom" data-code="+44">United Kingdom (+44)</option>
+                                    <option value="Canada" data-code="+1">Canada (+1)</option>
+                                    <option value="Australia" data-code="+61">Australia (+61)</option>
+                                    <option value="Germany" data-code="+49">Germany (+49)</option>
+                                    <option value="France" data-code="+33">France (+33)</option>
+                                    <option value="Spain" data-code="+34">Spain (+34)</option>
+                                    <option value="Italy" data-code="+39">Italy (+39)</option>
+                                    <option value="Netherlands" data-code="+31">Netherlands (+31)</option>
+                                    <option value="Belgium" data-code="+32">Belgium (+32)</option>
+                                    <option value="Switzerland" data-code="+41">Switzerland (+41)</option>
+                                    <option value="Austria" data-code="+43">Austria (+43)</option>
+                                    <option value="Sweden" data-code="+46">Sweden (+46)</option>
+                                    <option value="Norway" data-code="+47">Norway (+47)</option>
+                                    <option value="Denmark" data-code="+45">Denmark (+45)</option>
+                                    <option value="Finland" data-code="+358">Finland (+358)</option>
+                                    <option value="Poland" data-code="+48">Poland (+48)</option>
+                                    <option value="Portugal" data-code="+351">Portugal (+351)</option>
+                                    <option value="Greece" data-code="+30">Greece (+30)</option>
+                                    <option value="Ireland" data-code="+353">Ireland (+353)</option>
+                                    <option value="Japan" data-code="+81">Japan (+81)</option>
+                                    <option value="China" data-code="+86">China (+86)</option>
+                                    <option value="India" data-code="+91">India (+91)</option>
+                                    <option value="Singapore" data-code="+65">Singapore (+65)</option>
+                                    <option value="Thailand" data-code="+66">Thailand (+66)</option>
+                                    <option value="Malaysia" data-code="+60">Malaysia (+60)</option>
+                                    <option value="Indonesia" data-code="+62">Indonesia (+62)</option>
+                                    <option value="Philippines" data-code="+63">Philippines (+63)</option>
+                                    <option value="South Korea" data-code="+82">South Korea (+82)</option>
+                                    <option value="New Zealand" data-code="+64">New Zealand (+64)</option>
+                                    <option value="Mexico" data-code="+52">Mexico (+52)</option>
+                                    <option value="Brazil" data-code="+55">Brazil (+55)</option>
+                                    <option value="Argentina" data-code="+54">Argentina (+54)</option>
+                                    <option value="South Africa" data-code="+27">South Africa (+27)</option>
+                                    <option value="Kenya" data-code="+254">Kenya (+254)</option>
+                                    <option value="Nigeria" data-code="+234">Nigeria (+234)</option>
+                                    <option value="Egypt" data-code="+20">Egypt (+20)</option>
+                                    <option value="UAE" data-code="+971">UAE (+971)</option>
+                                </select>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="countryCode">+1</span>
+                                    <input type="tel" class="form-control" id="phone" placeholder="555-123-4567"
+                                        required>
+                                </div>
+                                <small class="text-muted">Include your country code</small>
+                                <div class="invalid-feedback" id="phoneError"></div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary w-100 mt-4" id="submitBtn">Complete
+                                Setup</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="script.js"></script>
+    <script>
+        const form = document.getElementById('profileForm');
+        const nameInput = document.getElementById('name');
+        const usernameInput = document.getElementById('username');
+        const countrySelect = document.getElementById('country');
+        const phoneInput = document.getElementById('phone');
+        const submitBtn = document.getElementById('submitBtn');
+        const countryCodeDisplay = document.getElementById('countryCode');
+
+        // Get signup data
+        const signupData = JSON.parse(localStorage.getItem('solosafe_temp_signup') || '{}');
+
+        if (!signupData.email) {
+            window.location.href = 'signup.html';
+        }
+
+        // Country code mapping
+        const countryCodes = {
+            'United States': '+1',
+            'Canada': '+1',
+            'United Kingdom': '+44',
+            'Australia': '+61',
+            'Germany': '+49',
+            'France': '+33',
+            'Spain': '+34',
+            'Italy': '+39',
+            'Netherlands': '+31',
+            'Belgium': '+32',
+            'Switzerland': '+41',
+            'Austria': '+43',
+            'Sweden': '+46',
+            'Norway': '+47',
+            'Denmark': '+45',
+            'Finland': '+358',
+            'Poland': '+48',
+            'Portugal': '+351',
+            'Greece': '+30',
+            'Ireland': '+353',
+            'Japan': '+81',
+            'China': '+86',
+            'India': '+91',
+            'Singapore': '+65',
+            'Thailand': '+66',
+            'Malaysia': '+60',
+            'Indonesia': '+62',
+            'Philippines': '+63',
+            'South Korea': '+82',
+            'New Zealand': '+64',
+            'Mexico': '+52',
+            'Brazil': '+55',
+            'Argentina': '+54',
+            'South Africa': '+27',
+            'Kenya': '+254',
+            'Nigeria': '+234',
+            'Egypt': '+20',
+            'UAE': '+971'
+        };
+
+        // Update country code when country changes
+        countrySelect.addEventListener('change', () => {
+            const selectedCountry = countrySelect.value;
+            countryCodeDisplay.textContent = countryCodes[selectedCountry] || '+1';
+            checkFormValidity();
+        });
+
+        // Phone input - only allow numbers and formatting characters
+        phoneInput.addEventListener('input', (e) => {
+            const value = e.target.value;
+            const phoneRegex = /^[\d\s()+-]*$/;
+            if (!phoneRegex.test(value)) {
+                phoneInput.value = value.slice(0, -1);
+            }
+            checkFormValidity();
+        });
+
+        // Enable/disable submit button
+        function checkFormValidity() {
+            const isValid = nameInput.value.trim() !== '' &&
+                usernameInput.value.trim() !== '' &&
+                countrySelect.value !== '' &&
+                phoneInput.value.trim() !== '';
+            submitBtn.disabled = !isValid;
+        }
+
+        nameInput.addEventListener('input', checkFormValidity);
+        usernameInput.addEventListener('input', checkFormValidity);
+        phoneInput.addEventListener('input', checkFormValidity);
+
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = nameInput.value.trim();
+            const username = usernameInput.value.trim();
+            const country = countrySelect.value;
+            const phone = phoneInput.value.trim();
+            const countryCode = countryCodes[country];
+
+            // Validate username format
+            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+            if (!usernameRegex.test(username)) {
+                usernameInput.classList.add('is-invalid');
+                document.getElementById('usernameError').textContent = 'Username must be 3-20 characters, alphanumeric and underscore only';
+                return;
+            }
+
+            // Check username uniqueness
+            const users = JSON.parse(localStorage.getItem('solosafe_users') || '[]');
+            if (users.some(u => u.username === username)) {
+                usernameInput.classList.add('is-invalid');
+                document.getElementById('usernameError').textContent = 'This username is already taken';
+                showToast('Username already exists', 'error');
+                return;
+            }
+
+            // Validate phone number with country code
+            if (!phone.startsWith(countryCode.replace('+', '')) && !phone.startsWith(countryCode)) {
+                phoneInput.classList.add('is-invalid');
+                document.getElementById('phoneError').textContent = `Phone number must match country code ${countryCode}`;
+                showToast('Input correct country code and name', 'error');
+                return;
+            }
+
+            // Create user object
+            const user = {
+                id: 'user_' + Date.now(),
+                email: signupData.email,
+                password: signupData.password,
+                name,
+                username,
+                nationality: country,
+                phone: phone.startsWith('+') ? phone : countryCode + phone,
+                verified: true,
+                createdAt: new Date().toISOString(),
+                profilePicture: null,
+                online: true
+            };
+
+            // Save user
+            users.push(user);
+            localStorage.setItem('solosafe_users', JSON.stringify(users));
+            localStorage.setItem('solosafe_user', JSON.stringify(user));
+
+            // Clear temp signup data
+            localStorage.removeItem('solosafe_temp_signup');
+
+            // Initialize empty arrays for user data
+            localStorage.setItem('solosafe_trips', JSON.stringify([]));
+            localStorage.setItem('solosafe_contacts', JSON.stringify([]));
+
+            showToast('Profile completed successfully!', 'success');
+
+            // Request notification permission
+            requestNotificationPermission();
+
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+    </script>
+</body>
+
+</html>

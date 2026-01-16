@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                            <h4 class="fw-bolder font-color pt-2">SoloSafe</h4>
+                            <h2>Verify Your Email</h2>
+                            <p class="text-muted" id="emailDisplay"></p>
+                        </div>
+
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-envelope mb-2" style="font-size: 32px;"></i>
+                            <p class="mb-0">We've sent a 6-digit verification code to your email.</p>
+                            <p class="mb-0"><small>Code expires in <span id="timer" class="fw-bold">5:00</span></small></p>
+                        </div>
+
+                        <form id="verifyForm">
+                            <div class="mb-4">
+                                <label for="verificationCode" class="form-label text-center w-100">
+                                    Enter Verification Code
+                                </label>
+                                <input type="text" class="form-control form-control-lg text-center"
+                                    id="verificationCode" placeholder="000000" maxlength="6" required
+                                    autocomplete="off">
+                                <div class="invalid-feedback text-center" id="codeError"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3" id="verifyBtn" disabled>
+                                Verify Email
+                            </button>
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">Didn't receive the code?</p>
+                                <button type="button" class="btn btn-link" id="resendBtn" disabled>
+                                    Resend Code (<span id="resendTimer">60</span>s)
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <a href="signup.html" class="text-muted">← Back to sign up</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <!-- ✅ EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <script src="script.js"></script>
+    <script>
+        // ========================================
+        // EMAILJS CONFIGURATION
+        // ========================================
+        // ⚠️ REPLACE THESE WITH YOUR ACTUAL VALUES FROM EMAILJS
+        const EMAILJS_PUBLIC_KEY = 'eX3QV1cP6ODGZVgHw';        // Get from EmailJS Dashboard
+        const EMAILJS_SERVICE_ID = 'service_yywfrl4';        // Your email service ID
+        const EMAILJS_TEMPLATE_ID = 'template_5a3s0ir';      // Your template ID
+
+        // Initialize EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // ========================================
+        // ELEMENTS
+        // ========================================
+        const form = document.getElementById('verifyForm');
+        const codeInput = document.getElementById('verificationCode');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const emailDisplay = document.getElementById('emailDisplay');
+        const timerDisplay = document.getElementById('timer');
+        const resendTimerDisplay = document.getElementById('resendTimer');
+        const codeError = document.getElementById('codeError');
+
+        let verificationCode = '';
+        let timeLeft = 300; // 5 minutes
+        let resendTimeLeft = 60; // 60 seconds cooldown
+        let timerInterval;
+        let resendInterval;
+
+        // ========================================
+        // GET SIGNUP DATA
+        // ========================================
+        const signupData = JSON.parse(localStorage.getItem('solosafe_temp_signup') || '{}');
+
+        if (!signupData.email) {
+            showToast('No email found. Please sign up first.', 'error');
+            setTimeout(() => {
+                window.location.href = 'signup.html';
+            }, 1500);
+        }
+
+        emailDisplay.textContent = signupData.email;
+
+        // ========================================
+        // SEND VERIFICATION EMAIL VIA EMAILJS
+        // ========================================
+        async function sendVerificationCode() {
+            // Generate 6-digit code
+            verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Store code with timestamp
+            localStorage.setItem('solosafe_verification', JSON.stringify({
+                code: verificationCode,
+                email: signupData.email,
+                timestamp: Date.now()
+            }));
+
+            console.log('🔐 Verification Code:', verificationCode); // For testing
+
+            try {
+                // Show loading
+                showToast('Sending verification code...', 'info');
+
+                // Send email via EmailJS
+                const response = await emailjs.send(
+                    EMAILJS_SERVICE_ID,
+                    EMAILJS_TEMPLATE_ID,
+                    {
+                        user_name: signupData.name || signupData.email.split('@')[0],
+                        user_email: signupData.email,
+                        verification_code: verificationCode,
+                        to_email: signupData.email // Make sure template uses this
+                    }
+
+
+                    
+                );
+
+                console.log('✅ Email sent successfully:', response);
+                showToast('Verification code sent to your email! 📧', 'success');
+
+                // Reset timer
+                timeLeft = 300;
+                startTimer();
+
+                // Start resend cooldown
+                startResendCooldown();
+
+            } catch (error) {
+                console.error('❌ Failed to send email:', error);
+                showToast('Failed to send email. Please try again.', 'error');
+                
+                // Fallback: Show code in console for testing
+                console.log('⚠️ Fallback - Use this code:', verificationCode);
+                showToast(`Testing Mode - Code: ${verificationCode}`, 'warning');
+            }
+        }
+
+        // ========================================
+        // START EXPIRY TIMER (5 minutes)
+        // ========================================
+        function startTimer() {
+            clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = 'Expired';
+                    timerDisplay.classList.add('text-danger');
+                    showToast('Verification code expired. Please request a new one.', 'warning');
+                }
+            }, 1000);
+        }
+
+        // ========================================
+        // RESEND COOLDOWN (60 seconds)
+        // ========================================
+        function startResendCooldown() {
+            resendTimeLeft = 60;
+            resendBtn.disabled = true;
+
+            clearInterval(resendInterval);
+
+            resendInterval = setInterval(() => {
+                resendTimeLeft--;
+                resendTimerDisplay.textContent = resendTimeLeft;
+
+                if (resendTimeLeft <= 0) {
+                    clearInterval(resendInterval);
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = 'Resend Code';
+                }
+            }, 1000);
+        }
+
+        // ========================================
+        // ENABLE VERIFY BUTTON WHEN CODE ENTERED
+        // ========================================
+        codeInput.addEventListener('input', () => {
+            verifyBtn.disabled = codeInput.value.length !== 6;
+            codeInput.classList.remove('is-invalid');
+        });
+
+        // Only allow numbers
+        codeInput.addEventListener('keypress', (e) => {
+            if (!/\d/.test(e.key) && e.key !== 'Backspace') {
+                e.preventDefault();
+            }
+        });
+
+        // ========================================
+        // VERIFY CODE
+        // ========================================
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const enteredCode = codeInput.value.trim();
+
+            // Check if code expired
+            if (timeLeft <= 0) {
+                codeInput.classList.add('is-invalid');
+                codeError.textContent = 'Code expired. Please request a new one.';
+                showToast('Code expired!', 'error');
+                return;
+            }
+
+            // Verify code
+            if (enteredCode === verificationCode) {
+                showToast('Email verified successfully! ✅', 'success');
+
+                // Clear temp data
+                clearInterval(timerInterval);
+                clearInterval(resendInterval);
+                localStorage.removeItem('solosafe_verification');
+
+                // Mark email as verified
+                signupData.emailVerified = true;
+                localStorage.setItem('solosafe_temp_signup', JSON.stringify(signupData));
+
+                // Redirect to complete profile or login
+                setTimeout(() => {
+                    window.location.href = 'complete-profile.html'; // or 'login.html'
+                }, 1500);
+            } else {
+                codeInput.classList.add('is-invalid');
+                codeError.textContent = 'Invalid code. Please try again.';
+                showToast('Invalid verification code ❌', 'error');
+                codeInput.value = '';
+                codeInput.focus();
+            }
+        });
+
+        // ========================================
+        // RESEND CODE
+        // ========================================
+        resendBtn.addEventListener('click', () => {
+            sendVerificationCode();
+            codeInput.value = '';
+            codeInput.classList.remove('is-invalid');
+            verifyBtn.disabled = true;
+        });
+
+        // ========================================
+        // INITIALIZE - SEND FIRST EMAIL
+        // ========================================
+        sendVerificationCode();
+    </script>
+</body>
+
+</html>

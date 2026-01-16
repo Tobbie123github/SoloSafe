@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoloSafe - Travel Solo with Confidence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Fixed Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <!-- <div class="logo-circle me-2">SS</div>
+                <span class="brand-name">SoloSafe</span> -->
+                <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                <h4 class="fw-bolder font-color pt-2">SoloSafe</h4>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto nav-links-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How it works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Pricing</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex gap-2">
+                    <a href="login.html" class="btn btn-outline-primary">Login</a>
+                    <a href="signup.html" class="btn btn-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">Explore the World Without Fear</h1>
+                    <p class="hero-subtitle">Your safety companion for solo adventures. Real-time check-ins, emergency
+                        alerts, and peace of mind for you and your loved ones.</p>
+
+                    <!-- Stats -->
+                    <div class="stats-container mb-4">
+                        <div class="stat-item">
+                            <div class="stat-number" id="usersCount" style="color: #001f3f;">100+</div>
+                            <div class="stat-label">Users</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="tripsCount" style="color: #0066ff;">500+</div>
+                            <div class="stat-label">Trips</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="countriesCount" style="color: #00cc66;">35+</div>
+                            <div class="stat-label">Countries</div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="hero-buttons">
+                        <a href="signup.html" class="btn btn-primary btn-lg px-5">Get Started</a>
+                        <a href="#how-it-works" class="btn btn-outline-primary btn-lg px-5">Learn More</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 position-relative">
+                    <div class="phone-mockup-container">
+                        <div class="phone-mockup floating">
+                            <img class="imgDiv" src="images/landing page picture.svg"
+                                alt="SoloSafe App" class="img-fluid">
+                        </div>
+
+                        <!-- Safety Badges -->
+                        <div class="safety-badge safe-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>All Safe</span>
+                        </div>
+
+                        <div class="safety-badge sos-badge">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>SOS Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">How SoloSafe Works</h2>
+            <p class="text-center text-muted mb-5">Simple steps to keep you safe on every adventure</p>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3>1. Create Your Trip</h3>
+                        <p>Enter your destination, travel dates, and set up your safety check-in schedule.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>2. Set Check-ins</h3>
+                        <p>Choose your preferred check-in interval from 1 minute to 48 hours.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h3>3. Add Emergency Contacts</h3>
+                        <p>Add trusted contacts who will be notified if you miss a check-in.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h3>4. Stay Connected</h3>
+                        <p>Receive timely notifications to check in and confirm you're safe.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-life-ring"></i>
+                        </div>
+                        <h3>5. Emergency Support</h3>
+                        <p>Trigger SOS alerts instantly if you need help. Contacts receive your location.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <div class="step-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>6. Travel with Confidence</h3>
+                        <p>Enjoy your adventure knowing help is always just one tap away.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding">
+        <div class="container">
+            <h2 class="section-title text-center">Why Choose SoloSafe</h2>
+            <p class="text-center text-muted mb-5">Comprehensive safety features designed for solo travelers</p>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3>Real-Time Location Tracking</h3>
+                        <p>Share your live location with emergency contacts for peace of mind.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h3>Smart Check-in Reminders</h3>
+                        <p>Customizable check-in intervals with automatic reminders.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>One-Tap SOS Alerts</h3>
+                        <p>Instantly notify all emergency contacts with your exact location.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <h3>Trip Itinerary Sharing</h3>
+                        <p>Share your travel plans with loved ones via secure links.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>Mobile Friendly</h3>
+                        <p>Access SoloSafe on any device, anywhere in the world.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>Privacy Protected</h3>
+                        <p>Your data is encrypted and only shared when you choose.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Choose Your Plan</h2>
+            <p class="text-center text-muted mb-5">Flexible pricing for every type of traveler</p>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3>Free</h3>
+                            <div class="price">
+                                <span class="currency">$</span>
+                                <span class="amount">0</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> 1 Active Trip</li>
+                            <li><i class="fas fa-check"></i> 2 Emergency Contacts</li>
+                            <li><i class="fas fa-check"></i> Basic Check-ins</li>
+                            <li><i class="fas fa-check"></i> SOS Alerts</li>
+                            <li class="text-muted"><i class="fas fa-times"></i> Location Tracking</li>
+                        </ul>
+                        <button class="btn btn-outline-primary w-100">Get Started</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="pricing-card featured">
+                        <div class="badge-featured">Most Popular</div>
+                        <div class="pricing-header">
+                            <h3>Premium</h3>
+                            <div class="price">
+                                <span class="currency">$</span>
+                                <span class="amount">9.99</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> Unlimited Trips</li>
+                            <li><i class="fas fa-check"></i> Unlimited Contacts</li>
+                            <li><i class="fas fa-check"></i> Advanced Check-ins</li>
+                            <li><i class="fas fa-check"></i> Priority SOS Alerts</li>
+                            <li><i class="fas fa-check"></i> Real-Time Location</li>
+                        </ul>
+                        <button class="btn btn-primary w-100">Get Started</button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3>Enterprise</h3>
+                            <div class="price">
+                                <span class="currency">$</span>
+                                <span class="amount">29.99</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> Everything in Premium</li>
+                            <li><i class="fas fa-check"></i> Team Management</li>
+                            <li><i class="fas fa-check"></i> Custom Branding</li>
+                            <li><i class="fas fa-check"></i> API Access</li>
+                            <li><i class="fas fa-check"></i> 24/7 Support</li>
+                        </ul>
+                        <button class="btn btn-outline-primary w-100">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2>Ready to Travel Safely?</h2>
+            <p>Join thousands of solo travelers who trust SoloSafe for their safety</p>
+            <a href="signup.html" class="btn btn-light btn-lg px-5">Create Account</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- <div class="logo-circle me-2">SS</div>
+                        <span class="brand-name text-white">SoloSafe</span> -->
+                        <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                        <h4 class="fw-bolder font-color pt-2 font-colorTwo">SoloSafe</h4>
+                    </div>
+                    <p class="text-white">Your trusted companion for safe solo travel adventures worldwide.</p>
+                </div>
+
+                <div class="col-md-2">
+                    <h5 class="text-white mb-3">Product</h5>
+                    <ul class="footer-links">
+                        <li><a href="#features" class="text-white">Features</a></li>
+                        <li><a href="#pricing" class="text-white">Pricing</a></li>
+                        <li><a href="#" class="text-white">Download</a></li>
+                        <li><a href="#" class="text-white">Updates</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-2">
+                    <h5 class="text-white mb-3">Company</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-white">About Us</a></li>
+                        <li><a href="#" class="text-white">Careers</a></li>
+                        <li><a href="#" class="text-white">Blog</a></li>
+                        <li><a href="#" class="text-white">Press</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-2">
+                    <h5 class="text-white mb-3">Support</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-white">Help Center</a></li>
+                        <li><a href="#" class="text-white">Contact</a></li>
+                        <li><a href="#" class="text-white">FAQ</a></li>
+                        <li><a href="#" class="text-white">Safety Tips</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-2">
+                    <h5 class="text-white mb-3">Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-white">Privacy</a></li>
+                        <li><a href="#" class="text-white">Terms</a></li>
+                        <li><a href="#" class="text-white">Security</a></li>
+                        <li><a href="#" class="text-white">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="text-white mb-0">&copy; 2025 SoloSafe. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white me-3"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Coming Soon Modal -->
+    <div class="modal fade" id="comingSoonModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <i class="fas fa-rocket" style="font-size: 64px; color: #667eea; margin-bottom: 20px;"></i>
+                    <h2>Coming Soon!</h2>
+                    <p class="text-muted">We're working hard to bring you premium features. Stay tuned!</p>
+                    <button type="button" class="btn btn-primary mt-3" data-bs-dismiss="modal">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Update dynamic stats
+        function updateStats() {
+            const users = JSON.parse(localStorage.getItem('solosafe_users') || '[]');
+            const trips = JSON.parse(localStorage.getItem('solosafe_all_trips') || '[]');
+            const countries = new Set(users.map(u => u.nationality).filter(Boolean));
+
+            document.getElementById('usersCount').textContent = `${users.length || 100}+`;
+            document.getElementById('tripsCount').textContent = `${trips.length || 500}+`;
+            document.getElementById('countriesCount').textContent = `${countries.size || 35}+`;
+        }
+
+        updateStats();
+
+        // Pricing card click handlers
+        document.querySelectorAll('.pricing-card button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('comingSoonModal'));
+                modal.show();
+            });
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

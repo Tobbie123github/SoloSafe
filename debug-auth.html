@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Auth - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>🔍 Authentication Debugger</h3>
+            </div>
+            <div class="card-body">
+                <h5>Step 1: Check LocalStorage</h5>
+                <pre id="localStorageCheck" class="bg-light p-3 border"></pre>
+
+                <h5 class="mt-4">Step 2: Check Cookies</h5>
+                <button class="btn btn-secondary btn-sm" onclick="checkCookies()">Check Cookies</button>
+                <pre id="cookiesCheck" class="bg-light p-3 border mt-2"></pre>
+
+                <h5 class="mt-4">Step 3: Test Login</h5>
+                <form id="testLoginForm">
+                    <div class="mb-3">
+                        <input type="email" class="form-control" id="email" placeholder="Email" value="emmanuelayomikun01@gmail.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="password" placeholder="Password" value="emless419" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">🔐 Test Login</button>
+                </form>
+                <pre id="loginResult" class="bg-light p-3 border mt-3" style="max-height: 400px; overflow-y: auto;"></pre>
+
+                <h5 class="mt-4">Step 4: Test Session (GET /api/trips)</h5>
+                <button class="btn btn-info" onclick="testSession()">🔍 Check Session</button>
+                <pre id="sessionResult" class="bg-light p-3 border mt-3" style="max-height: 400px; overflow-y: auto;"></pre>
+
+                <h5 class="mt-4">Step 5: Test Create Trip</h5>
+                <button class="btn btn-success" onclick="testCreateTrip()">✈️ Test Create Trip</button>
+                <pre id="createTripResult" class="bg-light p-3 border mt-3" style="max-height: 400px; overflow-y: auto;"></pre>
+
+                <h5 class="mt-4">Actions</h5>
+                <button class="btn btn-warning" onclick="clearStorage()">🗑️ Clear LocalStorage</button>
+                <button class="btn btn-danger" onclick="testLogout()">🚪 Test Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check localStorage on load
+        function updateLocalStorageCheck() {
+            document.getElementById('localStorageCheck').textContent = JSON.stringify({
+                user: localStorage.getItem('solosafe_user'),
+                darkMode: localStorage.getItem('solosafe_dark_mode'),
+                loggedIn: localStorage.getItem('solosafe_logged_in')
+            }, null, 2);
+        }
+        updateLocalStorageCheck();
+
+        // Check Cookies
+        function checkCookies() {
+            const cookies = document.cookie;
+            document.getElementById('cookiesCheck').textContent = cookies || '❌ No cookies found';
+        }
+
+        // Test Login
+        document.getElementById('testLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            resultDiv.textContent = '⏳ Logging in...\n';
+
+            try {
+                const response = await fetch('https://solosafe-backend.onrender.com/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', // ✅ Include cookies
+                    body: JSON.stringify({ email, password })
+                });
+
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `URL: ${response.url}\n`;
+                resultDiv.textContent += `Redirected: ${response.redirected}\n\n`;
+
+                // Get response text first
+                const text = await response.text();
+                resultDiv.textContent += `Response (first 500 chars):\n${text.substring(0, 500)}\n\n`;
+
+                // Try to parse as JSON
+                let data;
+                try {
+                    data = JSON.parse(text);
+                    resultDiv.textContent += `Parsed JSON:\n${JSON.stringify(data, null, 2)}\n\n`;
+
+                    if (response.ok && data.user) {
+                        localStorage.setItem('solosafe_user', JSON.stringify(data.user));
+                        localStorage.setItem('solosafe_logged_in', 'true');
+                        resultDiv.textContent += '✅ User saved to localStorage!\n';
+                        updateLocalStorageCheck();
+                        checkCookies();
+                    } else {
+                        resultDiv.textContent += '❌ Login failed!\n';
+                    }
+                } catch (parseErr) {
+                    resultDiv.textContent += `❌ Response is not JSON (received HTML):\n${text.substring(0, 1000)}\n`;
+                }
+
+            } catch (err) {
+                resultDiv.textContent += `\n❌ ERROR: ${err.message}\n${err.stack}`;
+            }
+        });
+
+        // Test Session
+        async function testSession() {
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.textContent = '⏳ Checking session...\n';
+
+            try {
+                const response = await fetch('https://solosafe-backend.onrender.com/api/trips/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                console.log(response);
+                console.error('Response object:', response);
+
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `URL: ${response.url}\n`;
+                resultDiv.textContent += `Redirected: ${response.redirected}\n\n`;
+
+                // Get response text first
+                const text = await response.text();
+
+                // Check if it's HTML (login page)
+                if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+                    resultDiv.textContent += '❌ REDIRECTED TO LOGIN PAGE!\n';
+                    resultDiv.textContent += 'This means your session is NOT authenticated.\n\n';
+                    resultDiv.textContent += `Response (first 500 chars):\n${text.substring(0, 500)}\n`;
+                } else {
+                    // Try to parse as JSON
+                    try {
+                        const data = JSON.parse(text);
+                        resultDiv.textContent += `✅ Session is valid!\n\n`;
+                        resultDiv.textContent += `Response:\n${JSON.stringify(data, null, 2)}\n`;
+                    } catch (parseErr) {
+                        resultDiv.textContent += `❌ Unexpected response:\n${text.substring(0, 1000)}\n`;
+                    }
+                }
+
+                checkCookies();
+            } catch (err) {
+                resultDiv.textContent += `\n❌ ERROR: ${err.message}`;
+            }
+        }
+
+        // Test Create Trip
+        async function testCreateTrip() {
+            const resultDiv = document.getElementById('createTripResult');
+            resultDiv.textContent = '⏳ Creating test trip...\n';
+
+            const tripData = {
+                destination: 'Paris, France',
+                startDate: '2026-02-01',
+                endDate: '2026-02-10',
+                accommodation: 'Test Hotel',
+                checkInFrequency: 24,
+                emergencyContact: []
+            };
+
+            try {
+                const response = await fetch('https://solosafe-backend.onrender.com/api/trips', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(tripData)
+                });
+
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `URL: ${response.url}\n`;
+                resultDiv.textContent += `Redirected: ${response.redirected}\n\n`;
+
+                // Get response text first
+                const text = await response.text();
+
+                // Check if it's HTML (login page)
+                if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+                    resultDiv.textContent += '❌ REDIRECTED TO LOGIN PAGE!\n';
+                    resultDiv.textContent += 'You must login first before creating a trip.\n\n';
+                    resultDiv.textContent += `Response (first 500 chars):\n${text.substring(0, 500)}\n`;
+                } else {
+                    // Try to parse as JSON
+                    try {
+                        const data = JSON.parse(text);
+                        if (response.ok) {
+                            resultDiv.textContent += `✅ Trip created successfully!\n\n`;
+                        } else {
+                            resultDiv.textContent += `❌ Failed to create trip!\n\n`;
+                        }
+                        resultDiv.textContent += `Response:\n${JSON.stringify(data, null, 2)}\n`;
+                    } catch (parseErr) {
+                        resultDiv.textContent += `❌ Unexpected response:\n${text.substring(0, 1000)}\n`;
+                    }
+                }
+
+                checkCookies();
+            } catch (err) {
+                resultDiv.textContent += `\n❌ ERROR: ${err.message}`;
+            }
+        }
+
+        // Test Logout
+        async function testLogout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('https://solosafe-backend.onrender.com/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                alert('Logout status: ' + response.status);
+                localStorage.clear();
+                location.reload();
+            } catch (err) {
+                alert('Logout error: ' + err.message);
+            }
+        }
+
+        // Clear Storage
+        function clearStorage() {
+            const confirmed = confirm('Clear all localStorage?');
+            if (!confirmed) return;
+            
+            localStorage.clear();
+            alert('LocalStorage cleared!');
+            updateLocalStorageCheck();
+            checkCookies();
+        }
+    </script>
+</body>
+</html>

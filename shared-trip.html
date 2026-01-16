@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Itinerary - SoloSafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+            padding-bottom: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: -30px;
+            width: 2px;
+            background: #ddd;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00cc66;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #00cc66;
+        }
+
+        .trip-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-active {
+            background: #00cc66;
+            color: white;
+        }
+
+        .status-emergency {
+            background: #ff4444;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .status-missed {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-completed {
+            background: #6b7280;
+            color: white;
+        }
+
+        .status-upcoming {
+            background: #3b82f6;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: emergencyPulse 2s infinite;
+        }
+
+        @keyframes emergencyPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="/images/logo-solo.jpg" width="25px" class="me-3" alt="logo-solo">
+                <h4 class="fw-bolder font-color pt-2 mb-0">SoloSafe</h4>
+            </a>
+            <span class="text-muted">Trip Itinerary</span>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Loading State -->
+        <div id="loadingContainer" class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="text-muted">Loading trip details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorContainer" style="display: none;" class="text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+            <h3>Trip Not Found</h3>
+            <p class="text-muted">This trip link may be invalid or the trip does not exist.</p>
+            <a href="index.html" class="btn btn-primary mt-3">
+                <i class="fas fa-home me-2"></i>Go to Homepage
+            </a>
+        </div>
+
+        <!-- Content -->
+        <div id="contentContainer" style="display: none;">
+            <!-- Emergency Alert Banner -->
+            <div id="emergencyBanner" class="emergency-banner" style="display: none;">
+                <h4 class="text-danger mb-2">
+                    <i class="fas fa-exclamation-triangle me-2"></i>🚨 EMERGENCY ALERT
+                </h4>
+                <p class="text-danger mb-0">
+                    This traveler has triggered an SOS alert and may need immediate assistance. 
+                    If you are an emergency contact, please reach out immediately!
+                </p>
+            </div>
+
+            <!-- Missed Check-in Alert -->
+            <div id="missedBanner" class="alert alert-warning" style="display: none;">
+                <h5 class="alert-heading">
+                    <i class="fas fa-clock me-2"></i>⚠️ Missed Check-in
+                </h5>
+                <p class="mb-0">
+                    This traveler has missed their scheduled check-in. Please verify their safety.
+                </p>
+            </div>
+
+            <!-- Header Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap">
+                        <div>
+                            <h2 class="mb-1" id="itineraryTitle">Trip Itinerary</h2>
+                            <p class="text-muted mb-3" id="travelerName">Solo Traveler</p>
+                        </div>
+                        <div>
+                            <span class="trip-status" id="tripStatus">ACTIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted">Destination</small>
+                            <p class="mb-0 fw-bold" id="destination">-</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted">Travel Dates</small>
+                            <p class="mb-0" id="travelDates">-</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <small class="text-muted">Next Check-in</small>
+                            <p class="mb-0" id="nextCheckIn">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Accommodation -->
+                    <div class="card mb-4" id="accommodationCard" style="display: none;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-hotel me-2"></i>Accommodation
+                            </h5>
+                            <p id="accommodation" class="mb-0">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Current Location -->
+                    <div class="card mb-4" id="locationCard">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-map-marker-alt me-2"></i>Location
+                            </h5>
+                            <p id="currentLocation" class="mb-2">Loading location...</p>
+                            <div id="map"></div>
+                        </div>
+                    </div>
+
+                    <!-- Check-in History -->
+                    <div class="card mb-4" id="historyCard" style="display: none;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-history me-2"></i>Check-in History
+                            </h5>
+                            <div class="timeline" id="checkInHistory">
+                                <p class="text-muted">No check-ins yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Status Card -->
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <div id="statusIcon">
+                                <i class="fas fa-spinner fa-spin fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">Loading...</h5>
+                            </div>
+                            <p class="text-muted mb-0 mt-3" id="lastUpdateTime">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contacts (only shown if emergency) -->
+                    <div class="card border-danger mb-4" id="emergencyContactsCard" style="display: none;">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-phone-alt me-2"></i>Emergency Contacts
+                            </h5>
+                            <div id="emergencyContactsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Info Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-shield-alt me-2"></i>About SoloSafe
+                            </h5>
+                            <p class="small text-muted">
+                                This itinerary is shared via SoloSafe, a safety platform for solo travelers.
+                                The traveler checks in regularly to confirm their safety.
+                            </p>
+                            <a href="index.html" class="btn btn-sm btn-primary w-100">
+                                <i class="fas fa-rocket me-2"></i>Try SoloSafe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-top py-4 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                Powered by <strong>SoloSafe</strong> - Your Travel Safety Companion
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Get trip ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tripId = urlParams.get('id');
+
+        let trip = null;
+        let map = null;
+
+        // Load trip details from API
+        async function loadTripDetails() {
+            if (!tripId) {
+                showError();
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `https://solosafe-backend.onrender.com/api/trips/public/${tripId}`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Trip not found');
+                }
+
+                trip = await response.json();
+                console.log('✅ Trip loaded:', trip);
+
+                displayTrip();
+
+            } catch (error) {
+                console.error('❌ Error loading trip:', error);
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        function displayTrip() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'block';
+
+            // Traveler name
+            const travelerName = trip.userId?.name || 'Solo Traveler';
+            document.getElementById('itineraryTitle').textContent = `${travelerName}'s Trip`;
+            document.getElementById('travelerName').textContent = `by ${travelerName}`;
+
+            // Destination
+            document.getElementById('destination').textContent = trip.destination;
+
+            // Travel dates
+            const startDate = new Date(trip.startDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            const endDate = new Date(trip.endDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            document.getElementById('travelDates').textContent = `${startDate} - ${endDate}`;
+
+            // Next check-in
+            if (trip.nextCheckIn) {
+                const nextCheckIn = new Date(trip.nextCheckIn).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+                document.getElementById('nextCheckIn').textContent = nextCheckIn;
+            } else {
+                document.getElementById('nextCheckIn').textContent = 'Not scheduled';
+            }
+
+            // Accommodation
+            if (trip.accommodation && trip.accommodation !== 'Not specified') {
+                document.getElementById('accommodationCard').style.display = 'block';
+                document.getElementById('accommodation').textContent = trip.accommodation;
+            }
+
+            // Handle status
+            handleStatus();
+
+            // Initialize map
+            initializeMap();
+        }
+
+        function handleStatus() {
+            const status = (trip.status || 'active').toLowerCase();
+            const statusBadge = document.getElementById('tripStatus');
+            const statusIcon = document.getElementById('statusIcon');
+
+            // Clear previous status
+            document.getElementById('emergencyBanner').style.display = 'none';
+            document.getElementById('missedBanner').style.display = 'none';
+            document.getElementById('emergencyContactsCard').style.display = 'none';
+
+            if (status === 'sos') {
+                // EMERGENCY
+                statusBadge.textContent = '🚨 EMERGENCY';
+                statusBadge.className = 'trip-status status-emergency';
+                
+                statusIcon.innerHTML = `
+                    <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                    <h5 class="text-danger">EMERGENCY ALERT</h5>
+                `;
+
+                document.getElementById('emergencyBanner').style.display = 'block';
+                
+                // Show emergency contacts if available
+                if (trip.emergencyContacts && trip.emergencyContacts.length > 0) {
+                    document.getElementById('emergencyContactsCard').style.display = 'block';
+                    document.getElementById('emergencyContactsList').innerHTML = 
+                        trip.emergencyContacts.map(contact => `
+                            <div class="mb-3 pb-3 border-bottom">
+                                <strong>${contact.name}</strong>
+                                ${contact.relationship ? `<br><small class="text-muted">${contact.relationship}</small>` : ''}
+                                <br><small><i class="fas fa-envelope me-1"></i>${contact.email}</small>
+                                ${contact.phone ? `<br><small><i class="fas fa-phone me-1"></i>${contact.phone}</small>` : ''}
+                            </div>
+                        `).join('');
+                }
+
+                document.getElementById('lastUpdateTime').textContent = 
+                    trip.sosTimestamp 
+                        ? `SOS triggered: ${new Date(trip.sosTimestamp).toLocaleString()}` 
+                        : 'Emergency alert active';
+
+            } else if (status === 'missed check-in') {
+                // MISSED CHECK-IN
+                statusBadge.textContent = '⚠️ MISSED CHECK-IN';
+                statusBadge.className = 'trip-status status-missed';
+                
+                statusIcon.innerHTML = `
+                    <i class="fas fa-clock fa-4x text-warning mb-3"></i>
+                    <h5 class="text-warning">Missed Check-in</h5>
+                `;
+
+                document.getElementById('missedBanner').style.display = 'block';
+                document.getElementById('lastUpdateTime').textContent = 
+                    'Traveler has missed scheduled check-in';
+
+            } else if (status === 'completed') {
+                // COMPLETED
+                statusBadge.textContent = '✅ COMPLETED';
+                statusBadge.className = 'trip-status status-completed';
+                
+                statusIcon.innerHTML = `
+                    <i class="fas fa-flag-checkered fa-4x text-success mb-3"></i>
+                    <h5 class="text-success">Trip Completed</h5>
+                `;
+
+                document.getElementById('lastUpdateTime').textContent = 
+                    `Completed: ${new Date(trip.endDate).toLocaleString()}`;
+
+            } else if (status === 'upcoming') {
+                // UPCOMING
+                statusBadge.textContent = '📅 UPCOMING';
+                statusBadge.className = 'trip-status status-upcoming';
+                
+                statusIcon.innerHTML = `
+                    <i class="fas fa-calendar fa-4x text-info mb-3"></i>
+                    <h5 class="text-info">Trip Not Started</h5>
+                `;
+
+                document.getElementById('lastUpdateTime').textContent = 
+                    `Starts: ${new Date(trip.startDate).toLocaleString()}`;
+
+            } else {
+                // ACTIVE (default)
+                statusBadge.textContent = '✅ ACTIVE';
+                statusBadge.className = 'trip-status status-active';
+                
+                statusIcon.innerHTML = `
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5 class="text-success">Traveler is Safe</h5>
+                `;
+
+                const lastCheckIn = trip.lastCheckIn 
+                    ? new Date(trip.lastCheckIn).toLocaleString() 
+                    : 'No check-ins yet';
+                
+                document.getElementById('lastUpdateTime').textContent = 
+                    `Last check-in: ${lastCheckIn}`;
+            }
+        }
+
+        function initializeMap() {
+            // Try to get location from trip data
+            const location = trip.lastKnownLocation || trip.sosLocation || null;
+
+            if (location && location.latitude && location.longitude) {
+                // Has GPS coordinates
+                document.getElementById('currentLocation').textContent = 
+                    `Lat: ${location.latitude.toFixed(6)}, Lng: ${location.longitude.toFixed(6)}`;
+
+                map = L.map('map').setView([location.latitude, location.longitude], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                const marker = L.marker([location.latitude, location.longitude]).addTo(map);
+                marker.bindPopup(`
+                    <b>${trip.userId?.name || 'Traveler'}</b><br>
+                    ${trip.destination}<br>
+                    <small>${new Date(location.timestamp || Date.now()).toLocaleString()}</small>
+                `).openPopup();
+
+            } else {
+                // No GPS - show destination text only
+                document.getElementById('currentLocation').textContent = trip.destination;
+                
+                // Show world map
+                map = L.map('map').setView([20, 0], 2);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            }
+        }
+
+        // Load trip on page load
+        if (tripId) {
+            loadTripDetails();
+        } else {
+            showError();
+        }
+    </script>
+</body>
+
+</html>
