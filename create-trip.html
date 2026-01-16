@@ -215,13 +215,18 @@ form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const destination = destinationInput.value.trim();
-   const startDate = new Date(startDateInput.value).toISOString();
-const endDate = new Date(endDateInput.value).toISOString();
+   const startDateObj = new Date(startDateInput.value);
+    const endDateObj = new Date(endDateInput.value);
+
     const accommodation = accommodationInput.value.trim() || 'Not specified';
     const checkInFrequency = parseInt(checkInFrequencyInput.value);
 
-    // Validate dates
-    if (new Date(endDate) < new Date(startDate)) {
+      if (isNaN(startDateObj) || isNaN(endDateObj)) {
+        showToast('Invalid date selected', 'error');
+        return;
+    }
+
+    if (endDateObj < startDateObj) {
         showToast('End date must be after start date', 'error');
         return;
     }
@@ -229,11 +234,11 @@ const endDate = new Date(endDateInput.value).toISOString();
     // Build payload matching backend schema
     const payload = {
     destination,
-    startDate: new Date(startDateInput.value).toISOString(),
-    endDate: new Date(endDateInput.value).toISOString(),
+    startDate: startDateObj.toISOString(),
+        endDate: endDateObj.toISOString(),
     accommodation,
     checkInFrequency,
-    emergencyContacts: []
+    emergencyContact: []
 };
 
 
