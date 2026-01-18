@@ -121,9 +121,17 @@
 
     async function loadTripDetails(){
         if(!tripId) return showError();
+         const auth = JSON.parse(localStorage.getItem("solosafe_user"));
+
+    const bearerToken = `Bearer ${auth.token}`;
         try{
-            const res = await fetch(`https://solosafe-backend.onrender.com/api/trips/public/${tripId}`);
-           
+            const res = await fetch(`https://solosafe-backend.onrender.com/api/trips/public/${tripId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': bearerToken
+                }
+            });
+
             if(!res.ok) throw new Error();
             trip = await res.json();
             renderTrip();

@@ -200,7 +200,7 @@ form.addEventListener('submit', async (e) => {
         const response = await fetch('https://solosafe-backend.onrender.com/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', // ✅ CRITICAL: Include cookies for sessions
+             
             body: JSON.stringify({ email, password })
         });
 
@@ -218,7 +218,7 @@ form.addEventListener('submit', async (e) => {
         // ✅ For session auth, only store user data (no token)
         // The session cookie is automatically stored by the browser
         if (data) {
-            localStorage.setItem('solosafe_user', JSON.stringify(data.user));
+            localStorage.setItem('solosafe_user', JSON.stringify(data));
             showToast('Login successful 🎉', 'success');
 
             setTimeout(() => {

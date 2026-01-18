@@ -173,10 +173,16 @@ const user = getCurrentUser();
        3. LOAD CONTACTS (GET)
     ------------------------------ */
     async function loadContacts() {
+         const auth = JSON.parse(localStorage.getItem("solosafe_user"));
+
+    const bearerToken = `Bearer ${auth.token}`;
         try {
             const res = await fetch(
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts`,
-                { credentials: 'include' }
+                { credentials: 'include', headers: {
+                'Content-Type': 'application/json',
+                'Authorization': bearerToken
+            }   }
             );
 
             const data = await res.json();
@@ -256,12 +262,18 @@ const user = getCurrentUser();
         saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
 
         try {
+             const auth = JSON.parse(localStorage.getItem("solosafe_user"));
+
+    const bearerToken = `Bearer ${auth.token}`;
             const res = await fetch(
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts`,
                 {
                     method: 'PUT',
                     credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                'Content-Type': 'application/json',
+                'Authorization': bearerToken
+            },
                     body: JSON.stringify({ name, email, phone })
                 }
             );
@@ -303,11 +315,16 @@ const user = getCurrentUser();
     ------------------------------ */
     async function deleteContact(contactId) {
         if (!confirm('Remove this contact?')) return;
+             const auth = JSON.parse(localStorage.getItem("solosafe_user"));
 
+    const bearerToken = `Bearer ${auth.token}`;
         try {
             const res = await fetch(
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts/${contactId}`,
-                { method: 'DELETE', credentials: 'include' }
+                { method: 'DELETE', credentials: 'include', headers: {
+                'Content-Type': 'application/json',
+                'Authorization': bearerToken
+            } }
             );
 
             if (!res.ok) throw new Error('Failed to delete contact');

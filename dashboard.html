@@ -219,12 +219,24 @@
         }
     });
 
+    //Get Bearer token from local storage
+    const auth = JSON.parse(localStorage.getItem("solosafe_user"));
+
+    const bearerToken = `Bearer ${auth.token}`;
+
+    
+
     // Fetch trips from backend
     let trips = [];
     try {
         const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips', {
             method: 'GET',
-            credentials: 'include'
+            //Bearer
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': bearerToken
+            }
+           
         });
         trips = await response.json();
     } catch (err) {

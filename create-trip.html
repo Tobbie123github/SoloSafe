@@ -246,11 +246,15 @@ form.addEventListener('submit', async (e) => {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
 
     try {
+         const auth = JSON.parse(localStorage.getItem("solosafe_user"));
+
+    const bearerToken = `Bearer ${auth.token}`;
         const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips', {
             method: 'POST',
             credentials: 'include',
             headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': bearerToken
     },
             body: JSON.stringify(payload)
         });
