@@ -393,7 +393,7 @@ if (addContactBtn && trip) {
 // ========================
 if (trip) {
     document.getElementById('tripTitle').textContent = trip.destination;
-    document.getElementById('tripStatus').textContent = "trip.status || 'SAFE'";
+    document.getElementById('tripStatus').textContent = "active";
     document.getElementById('tripDates').textContent =
         `${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`;
     document.getElementById('tripDestination').textContent = trip.destination;
@@ -549,7 +549,7 @@ async function performCheckIn() {
         console.log('✅ Check-in Response:', data);
 
         // Update local trip data
-        trip.status = 'SAFE';
+        trip.status = 'Active';
         trip.lastCheckIn = new Date().toISOString();
         trip.nextCheckIn = data.nextCheckIn || calculateNextCheckIn(trip);
         trip.graceStarted = false;
@@ -755,7 +755,7 @@ async function cancelSOS() {
         }
 
         // Update local trip status
-        trip.status = 'SAFE';
+        trip.status = 'Active';
         trip.sosTriggered = false;
 
         // Update localStorage
@@ -817,7 +817,7 @@ function updateUIForNormalMode() {
     // Restore trip status display
     const statusEl = document.getElementById('tripStatus');
     if (statusEl) {
-        statusEl.textContent = 'SAFE';
+        statusEl.textContent = 'Active';
         statusEl.style.color = '';
         statusEl.style.fontWeight = '';
     }
