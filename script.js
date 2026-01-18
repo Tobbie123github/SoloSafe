@@ -151,10 +151,14 @@ function updateUserProfile(updates) {
 }
 
 function getWelcomeMessage() {
-    const user = getCurrentUser();
-    if (!user) return '';
+    // const user = getCurrentUser();
+    // if (!user) return '';
+
+    const data = JSON.parse(localStorage.getItem("solosafe_user"));
+
     
-    return `Welcome back, ${user.name || user.email}!`;
+    
+    return `Welcome back, ${data.user.name || data.requestNotificationPermission.email}!`;
 }
 
 function logout() {
