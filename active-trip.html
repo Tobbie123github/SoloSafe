@@ -999,6 +999,7 @@ async function confirmEndTrip() {
         const auth = JSON.parse(localStorage.getItem("solosafe_user"));
         const bearerToken = `Bearer ${auth.token}`;
         
+        // Call backend to end the trip
         const response = await fetch(
             `https://solosafe-backend.onrender.com/api/trips/${trip._id}/end`,
             {
@@ -1015,8 +1016,35 @@ async function confirmEndTrip() {
             throw new Error(errorData.message || 'Failed to end trip');
         }
 
+        const updatedTrip = await response.json();
+        console.log('✅ Trip ended:', updatedTrip);
+
+        // Update the trip status in localStorage
+        trip.status = 'Completed';
+        updateTripInLocalStorage();
+
+        // Fetch fresh trips from backend to update localStorage
+        try {
+            const tripsResponse = await fetch('https://solosafe-backend.onrender.com/api/trips', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': bearerToken
+                }
+            });
+            
+            if (tripsResponse.ok) {
+                const freshTrips = await tripsResponse.json();
+                localStorage.setItem('solosafe_trips', JSON.stringify(freshTrips));
+                console.log('✅ Trips refreshed from backend');
+            }
+        } catch (fetchErr) {
+            console.warn('Could not refresh trips:', fetchErr);
+        }
+
         showToast('Trip completed successfully! 🎉', 'success');
 
+        // Redirect to dashboard after 2 seconds
         setTimeout(() => {
             window.location.href = 'dashboard.html';
         }, 2000);
@@ -1026,7 +1054,6 @@ async function confirmEndTrip() {
         showToast(err.message || 'Failed to end trip', 'error');
     }
 }
-
 // ========================
 // INITIALIZATION ON LOAD
 // ========================

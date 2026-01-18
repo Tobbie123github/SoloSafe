@@ -241,6 +241,14 @@ function resetButton(button) {
         showToast(errorMessage, 'error');
         return;
     }
+    const data = await response.json();
+
+        console.log(data);
+        if (data){
+            localStorage.setItem('solosafe_user', JSON.stringify(data));
+        }
+
+        
 
     showToast('Verification email sent! Check your inbox.', 'success');
 
