@@ -257,7 +257,7 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
         await fetch('https://solosafe-backend.onrender.com/api/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', // ✅ Include credentials
+         
             body: JSON.stringify({ email: resetEmail })
         });
 

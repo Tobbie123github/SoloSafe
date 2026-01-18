@@ -528,7 +528,7 @@ async function performCheckIn() {
             `https://solosafe-backend.onrender.com/api/trips/${trip._id}/safe`,
             {
                 method: 'PUT',
-                credentials: 'include',
+                
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': bearerToken

@@ -221,7 +221,7 @@ function resetButton(button) {
     const response = await fetch('https://solosafe-backend.onrender.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        
         body: JSON.stringify({ name: nameValue, email, password })
     });
     

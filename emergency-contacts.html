@@ -179,7 +179,7 @@ const user = getCurrentUser();
         try {
             const res = await fetch(
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts`,
-                { credentials: 'include', headers: {
+                {  headers: {
                 'Content-Type': 'application/json',
                 'Authorization': bearerToken
             }   }
@@ -269,7 +269,7 @@ const user = getCurrentUser();
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts`,
                 {
                     method: 'PUT',
-                    credentials: 'include',
+                   
                     headers: {
                 'Content-Type': 'application/json',
                 'Authorization': bearerToken
@@ -321,7 +321,7 @@ const user = getCurrentUser();
         try {
             const res = await fetch(
                 `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts/${contactId}`,
-                { method: 'DELETE', credentials: 'include', headers: {
+                { method: 'DELETE', headers: {
                 'Content-Type': 'application/json',
                 'Authorization': bearerToken
             } }

@@ -251,7 +251,7 @@ form.addEventListener('submit', async (e) => {
     const bearerToken = `Bearer ${auth.token}`;
         const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips', {
             method: 'POST',
-            credentials: 'include',
+            
             headers: {
         'Content-Type': 'application/json',
         'Authorization': bearerToken

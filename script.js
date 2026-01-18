@@ -90,7 +90,7 @@ function toggleDarkMode() {
 
 async function authenticatedFetch(url, options = {}) {
     const defaultOptions = {
-        credentials: 'include', // ✅ CRITICAL: Include session cookies
+        // ✅ CRITICAL: Include session cookies
         headers: {
             'Content-Type': 'application/json',
             ...options.headers
