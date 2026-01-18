@@ -393,7 +393,7 @@ if (addContactBtn && trip) {
 // ========================
 if (trip) {
     document.getElementById('tripTitle').textContent = trip.destination;
-    document.getElementById('tripStatus').textContent = trip.status || 'SAFE';
+    document.getElementById('tripStatus').textContent = "trip.status || 'SAFE'";
     document.getElementById('tripDates').textContent =
         `${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`;
     document.getElementById('tripDestination').textContent = trip.destination;

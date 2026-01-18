@@ -216,7 +216,11 @@ form.addEventListener('submit', async (e) => {
 
     const destination = destinationInput.value.trim();
    const startDateObj = new Date(startDateInput.value);
+startDateObj.setHours(0, 0, 0, 0);
+
     const endDateObj = new Date(endDateInput.value);
+endDateObj.setHours(23, 59, 59, 999);
+
 
     const accommodation = accommodationInput.value.trim() || 'Not specified';
     const checkInFrequency = parseInt(checkInFrequencyInput.value);
