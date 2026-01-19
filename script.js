@@ -904,15 +904,18 @@ document.addEventListener('click', (e) => {
 // INITIALIZATION
 // ========================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => { // Added async
     initializeDarkMode();
     
-    // Check if user is logged in for protected pages
+    // 1. Process Google Login FIRST
+    const isGoogleLogin = await handleGoogleCallback();
+    
+    // 2. Define protected pages
     const protectedPages = ['dashboard', 'create-trip', 'active-trip', 'emergency-contacts', 'settings'];
     const currentPage = window.location.pathname;
-    
     const isProtectedPage = protectedPages.some(page => currentPage.includes(page));
     
+    // 3. Only redirect if it's a protected page AND we don't have a user now
     if (isProtectedPage) {
         const user = getCurrentUser();
         if (!user) {
@@ -920,9 +923,26 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1000);
+            return; // Stop further execution
         }
+        
+        // 4. Update UI with user info if on dashboard
+        updateUIWithUserData(user);
     }
 });
+
+// Helper to update the dashboard UI elements
+function updateUIWithUserData(user) {
+    const welcomeMsg = document.getElementById('welcomeMessage');
+    const headerName = document.getElementById('headerUserName');
+    const headerEmail = document.getElementById('headerUserEmail');
+    const headerPic = document.getElementById('headerProfilePic');
+
+    if (welcomeMsg) welcomeMsg.innerText = getWelcomeMessage();
+    if (headerName) headerName.innerText = user.name || user.username || 'User';
+    if (headerEmail) headerEmail.innerText = user.email;
+    if (headerPic && user.profilePicture) headerPic.src = user.profilePicture;
+}
 
 // ========================
 // EXPORT GLOBAL FUNCTIONS
