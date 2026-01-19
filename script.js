@@ -1,10 +1,13 @@
-// SoloSafe - Complete JavaScript Functionality (Session-Based Auth)
+// ========================
+// SOLOSAFE - MAIN SCRIPT
+// Complete rewrite with unified authentication
+// ========================
+
+const API_BASE_URL = 'https://solosafe-backend.onrender.com/api';
 
 // ========================
-// UTILITY FUNCTIONS
+// TOAST NOTIFICATION SYSTEM
 // ========================
-
-// Toast Notification System
 
 function showToast(message, type = 'info') {
     const colors = {
@@ -27,45 +30,6 @@ function showToast(message, type = 'info') {
     }).showToast();
 }
 
-// function showToast(message, type = 'info') {
-//     const container = document.querySelector('.toast-container') || createToastContainer();
-    
-//     const toast = document.createElement('div');
-//     toast.className = `toast ${type}`;
-    
-//     const icon = getToastIcon(type);
-    
-//     toast.innerHTML = `
-//         <i class="fas ${icon}"></i>
-//         <span>${message}</span>
-//         <div class="toast-progress"></div>
-//     `;
-    
-//     container.appendChild(toast);
-    
-//     setTimeout(() => {
-//         toast.style.animation = 'slideOut 0.3s ease-out';
-//         setTimeout(() => toast.remove(), 300);
-//     }, 5000);
-// }
-
-// function createToastContainer() {
-//     const container = document.createElement('div');
-//     container.className = 'toast-container';
-//     document.body.appendChild(container);
-//     return container;
-// }
-
-// function getToastIcon(type) {
-//     const icons = {
-//         success: 'fa-check-circle',
-//         error: 'fa-exclamation-circle',
-//         info: 'fa-info-circle',
-//         warning: 'fa-exclamation-triangle'
-//     };
-//     return icons[type] || icons.info;
-// }
-
 // ========================
 // DARK MODE
 // ========================
@@ -85,14 +49,231 @@ function toggleDarkMode() {
 }
 
 // ========================
-// AUTHENTICATED FETCH (Session-Based)
+// AUTHENTICATION & USER MANAGEMENT
 // ========================
 
+/**
+ * Get authentication token from storage
+ * Checks both regular login and Google OAuth tokens
+ */
+function getAuthToken() {
+    // First check for regular login token
+    const userStr = localStorage.getItem('solosafe_user');
+    if (userStr && userStr !== 'undefined' && userStr !== 'null') {
+        try {
+            const userData = JSON.parse(userStr);
+            if (userData.token) {
+                return userData.token;
+            }
+        } catch (err) {
+            console.error('Error parsing user token:', err);
+        }
+    }
+    
+    // Fallback to Google token
+    const googleToken = localStorage.getItem('solosafe_token');
+    return googleToken || null;
+}
+
+/**
+ * Get current user with unified structure
+ * Returns: { name, email, username, token, profilePicture, ... }
+ */
+function getCurrentUser() {
+    const userStr = localStorage.getItem('solosafe_user');
+    
+    if (!userStr || userStr === 'undefined' || userStr === 'null') {
+        return null;
+    }
+    
+    try {
+        const data = JSON.parse(userStr);
+        
+        // Handle different response structures
+        // Regular login: { token, user: { name, email, ... } }
+        // Google login: { token, name, email, ... }
+        
+        if (data.user) {
+            // Regular login structure - flatten it
+            return {
+                ...data.user,
+                token: data.token
+            };
+        } else {
+            // Google login structure (already flat)
+            return data;
+        }
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('solosafe_user');
+        return null;
+    }
+}
+
+/**
+ * Fetch user profile from backend and store it
+ */
+async function fetchUserProfile() {
+    try {
+        const token = getAuthToken();
+        
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch user profile');
+        }
+
+        const userData = await response.json();
+        
+        // Store in unified format
+        const userToStore = {
+            ...userData,
+            token: token
+        };
+        
+        localStorage.setItem('solosafe_user', JSON.stringify(userToStore));
+        
+        return userToStore;
+    } catch (err) {
+        console.error('Failed to fetch user profile:', err);
+        throw err;
+    }
+}
+
+/**
+ * Handle Google OAuth callback
+ * Called automatically on dashboard load if ?token param exists
+ */
+async function handleGoogleCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    
+    if (!token) {
+        return false; // Not a Google callback
+    }
+    
+    try {
+        console.log('🔐 Processing Google OAuth token...');
+        
+        // Store the token temporarily
+        localStorage.setItem('solosafe_token', token);
+        
+        // Fetch full user profile from backend
+        const user = await fetchUserProfile();
+        
+        console.log('✅ User authenticated:', user.email);
+        
+        // Clean up temporary token (now stored in solosafe_user)
+        localStorage.removeItem('solosafe_token');
+        
+        // Clean URL WITHOUT reloading (this prevents the loop!)
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+        // Show success message
+        showToast(`Welcome ${user.name || user.email}!`, 'success');
+        
+        return true;
+    } catch (err) {
+        console.error('Google sign-in error:', err);
+        showToast('Authentication failed. Please try again.', 'error');
+        
+        // Clean up failed attempt
+        localStorage.removeItem('solosafe_token');
+        localStorage.removeItem('solosafe_user');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 20000);
+        return false;
+    }
+}
+
+/**
+ * Update user profile in storage
+ */
+function updateUserProfile(updates) {
+    const user = getCurrentUser();
+    if (!user) return null;
+    
+    const updatedUser = { ...user, ...updates };
+    localStorage.setItem('solosafe_user', JSON.stringify(updatedUser));
+    
+    return updatedUser;
+}
+
+/**
+ * Get personalized welcome message
+ */
+function getWelcomeMessage() {
+    const user = getCurrentUser();
+    if (!user) return 'Welcome!';
+    
+    const displayName = user.name || user.username || user.email.split('@')[0];
+    return `Welcome back, ${displayName}!`;
+}
+
+/**
+ * Logout user and clear all data
+ */
+function logout() {
+    const token = getAuthToken();
+    
+    // Call backend logout endpoint
+    if (token) {
+        fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).catch(err => console.error('Logout error:', err));
+    }
+    
+    // Clear all auth data
+    localStorage.removeItem('solosafe_user');
+    localStorage.removeItem('solosafe_token');
+    localStorage.removeItem('solosafe_trips');
+    localStorage.removeItem('solosafe_temp_signup');
+    
+    showToast('Logged out successfully', 'success');
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1000);
+}
+
+// ========================
+// AUTHENTICATED FETCH
+// ========================
+
+/**
+ * Make authenticated API requests
+ * Automatically includes Bearer token and handles 401 errors
+ */
 async function authenticatedFetch(url, options = {}) {
+    const token = getAuthToken();
+    
+    if (!token) {
+        showToast('Please login first', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
+        return null;
+    }
+    
     const defaultOptions = {
-        // ✅ CRITICAL: Include session cookies
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
             ...options.headers
         }
     };
@@ -106,6 +287,7 @@ async function authenticatedFetch(url, options = {}) {
         if (response.status === 401) {
             showToast('Session expired. Please login again.', 'warning');
             localStorage.removeItem('solosafe_user');
+            localStorage.removeItem('solosafe_token');
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1500);
@@ -121,71 +303,15 @@ async function authenticatedFetch(url, options = {}) {
 }
 
 // ========================
-// USER MANAGEMENT
-// ========================
-
-function getCurrentUser() {
-    const userStr = localStorage.getItem('solosafe_user');
-    
-    if (!userStr || userStr === 'undefined' || userStr === 'null') {
-        return null;
-    }
-    
-    try {
-        return JSON.parse(userStr);
-    } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('solosafe_user');
-        return null;
-    }
-}
-
-function updateUserProfile(updates) {
-    const user = getCurrentUser();
-    if (!user) return null;
-    
-    const updatedUser = { ...user, ...updates };
-    localStorage.setItem('solosafe_user', JSON.stringify(updatedUser));
-    
-    return updatedUser;
-}
-
-function getWelcomeMessage() {
-    // const user = getCurrentUser();
-    // if (!user) return '';
-
-    const data = JSON.parse(localStorage.getItem("solosafe_user"));
-
-    
-    
-    return `Welcome back, ${data.user.name || data.requestNotificationPermission.email}!`;
-}
-
-function logout() {
-    // Call backend logout endpoint
-    fetch('https://solosafe-backend.onrender.com/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-    }).catch(err => console.error('Logout error:', err));
-    
-    // Clear local storage
-    localStorage.removeItem('solosafe_user');
-    localStorage.removeItem("solosafe_trips");
-    localStorage.removeItem("solosafe_temp_signup");
-    
-    showToast('Logged out successfully', 'success');
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1000);
-}
-
-// ========================
 // TRIP MANAGEMENT
 // ========================
 
+/**
+ * Create a new trip
+ */
 async function createTrip(tripData) {
     try {
-        const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips', {
+        const response = await authenticatedFetch(`${API_BASE_URL}/trips`, {
             method: 'POST',
             body: JSON.stringify(tripData)
         });
@@ -207,30 +333,57 @@ async function createTrip(tripData) {
     }
 }
 
-async function getCurrentTrip() {
+/**
+ * Get all trips for current user
+ */
+async function getAllTrips() {
     try {
-        const response = await authenticatedFetch('https://solosafe-backend.onrender.com/api/trips');
+        const response = await authenticatedFetch(`${API_BASE_URL}/trips`);
         
-        if (!response) return null;
+        if (!response) return [];
         
-        const data = await response.json();
+        const trips = await response.json();
         
-        if (response.ok && data.trips) {
-            // Find active trip
-            return data.trips.find(t => t.status === 'active') || null;
+        if (response.ok && Array.isArray(trips)) {
+            // Cache trips in localStorage
+            localStorage.setItem('solosafe_trips', JSON.stringify(trips));
+            return trips;
         }
         
-        return null;
+        return [];
     } catch (err) {
         console.error('Get trips error:', err);
+        return [];
+    }
+}
+
+/**
+ * Get current active trip
+ */
+async function getCurrentTrip() {
+    try {
+        const trips = await getAllTrips();
+        const now = new Date();
+        
+        // Find active trip (started, not ended, not completed)
+        return trips.find(t => {
+            const start = new Date(t.startDate);
+            const end = new Date(t.endDate);
+            return start <= now && now <= end && t.status !== 'Completed';
+        }) || null;
+    } catch (err) {
+        console.error('Get current trip error:', err);
         return null;
     }
 }
 
+/**
+ * Update trip details
+ */
 async function updateTrip(tripId, updates) {
     try {
         const response = await authenticatedFetch(
-            `https://solosafe-backend.onrender.com/api/trips/${tripId}`,
+            `${API_BASE_URL}/trips/${tripId}`,
             {
                 method: 'PUT',
                 body: JSON.stringify(updates)
@@ -252,10 +405,13 @@ async function updateTrip(tripId, updates) {
     }
 }
 
+/**
+ * End a trip
+ */
 async function endTrip(tripId) {
     try {
         const response = await authenticatedFetch(
-            `https://solosafe-backend.onrender.com/api/trips/${tripId}/end`,
+            `${API_BASE_URL}/trips/${tripId}/end`,
             {
                 method: 'PUT'
             }
@@ -267,7 +423,7 @@ async function endTrip(tripId) {
         
         if (response.ok && data.trip) {
             showToast('Trip completed successfully', 'success');
-            sendNotification('Trip Completed', `Your trip has ended`);
+            sendNotification('Trip Completed', 'Your trip has ended safely');
             return data.trip;
         }
         
@@ -279,12 +435,15 @@ async function endTrip(tripId) {
     }
 }
 
+/**
+ * Check in during a trip
+ */
 async function checkIn(tripId) {
     try {
         const location = await getCurrentLocation().catch(() => null);
         
         const response = await authenticatedFetch(
-            `https://solosafe-backend.onrender.com/api/trips/${tripId}/safe`,
+            `${API_BASE_URL}/trips/${tripId}/safe`,
             {
                 method: 'PUT',
                 body: JSON.stringify({
@@ -313,12 +472,15 @@ async function checkIn(tripId) {
     }
 }
 
+/**
+ * Trigger SOS alert
+ */
 async function triggerSOS(tripId) {
     try {
         const location = await getCurrentLocation().catch(() => null);
         
         const response = await authenticatedFetch(
-            'https://solosafe-backend.onrender.com/api/alerts/sos',
+            `${API_BASE_URL}/alerts/sos`,
             {
                 method: 'POST',
                 body: JSON.stringify({
@@ -348,10 +510,13 @@ async function triggerSOS(tripId) {
 // EMERGENCY CONTACTS
 // ========================
 
+/**
+ * Add emergency contact to trip
+ */
 async function addContact(tripId, contact) {
     try {
         const response = await authenticatedFetch(
-            `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts`,
+            `${API_BASE_URL}/trips/${tripId}/contacts`,
             {
                 method: 'PUT',
                 body: JSON.stringify(contact)
@@ -376,10 +541,13 @@ async function addContact(tripId, contact) {
     }
 }
 
+/**
+ * Remove emergency contact from trip
+ */
 async function removeContact(tripId, contactId) {
     try {
         const response = await authenticatedFetch(
-            `https://solosafe-backend.onrender.com/api/trips/${tripId}/contacts/${contactId}`,
+            `${API_BASE_URL}/trips/${tripId}/contacts/${contactId}`,
             {
                 method: 'DELETE'
             }
@@ -403,6 +571,9 @@ async function removeContact(tripId, contactId) {
 let watchId = null;
 let currentLocation = null;
 
+/**
+ * Get current GPS location
+ */
 function getCurrentLocation() {
     return new Promise((resolve, reject) => {
         if (!navigator.geolocation) {
@@ -421,11 +592,19 @@ function getCurrentLocation() {
             },
             error => {
                 reject(error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     });
 }
 
+/**
+ * Start continuous location tracking
+ */
 function startLocationTracking() {
     if (!navigator.geolocation) {
         showToast('Geolocation not supported by your browser', 'error');
@@ -457,6 +636,9 @@ function startLocationTracking() {
     showToast('Location tracking enabled', 'success');
 }
 
+/**
+ * Stop location tracking
+ */
 function stopLocationTracking() {
     if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
@@ -469,6 +651,9 @@ function stopLocationTracking() {
 // NOTIFICATION API
 // ========================
 
+/**
+ * Request permission for browser notifications
+ */
 function requestNotificationPermission() {
     if (!('Notification' in window)) {
         console.log('This browser does not support notifications');
@@ -476,6 +661,7 @@ function requestNotificationPermission() {
     }
     
     if (Notification.permission === 'granted') {
+        showToast('Notifications already enabled', 'info');
         return;
     }
     
@@ -489,6 +675,9 @@ function requestNotificationPermission() {
     }
 }
 
+/**
+ * Send browser notification
+ */
 function sendNotification(title, body, options = {}) {
     if (!('Notification' in window)) {
         console.log('Notifications not supported');
@@ -512,6 +701,9 @@ function sendNotification(title, body, options = {}) {
     }
 }
 
+/**
+ * Show notification permission prompt
+ */
 function showNotificationPrompt() {
     if (Notification.permission === 'default') {
         const promptDiv = document.createElement('div');
@@ -545,15 +737,15 @@ function dismissNotificationPrompt() {
 // ITINERARY SHARING
 // ========================
 
+/**
+ * Generate and copy shareable trip link
+ */
 function generateShareLink(tripId) {
-    // Generate public share link
     const shareLink = `${window.location.origin}/shared-trip.html?id=${tripId}`;
     
-    // Copy to clipboard
     navigator.clipboard.writeText(shareLink).then(() => {
         showToast('Share link copied to clipboard! 📋', 'success');
         sendNotification('Link Shared', 'Trip itinerary link has been copied');
-        
     }).catch(() => {
         // Fallback if clipboard API fails
         showToast('Link: ' + shareLink, 'info');
@@ -566,8 +758,21 @@ function generateShareLink(tripId) {
 // PROFILE MANAGEMENT
 // ========================
 
+/**
+ * Upload profile picture
+ */
 function uploadProfilePicture(file) {
     return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+            reject(new Error('Please select an image file'));
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            reject(new Error('Image size must be less than 5MB'));
+            return;
+        }
+        
         const reader = new FileReader();
         
         reader.onload = function(e) {
@@ -585,10 +790,13 @@ function uploadProfilePicture(file) {
     });
 }
 
+/**
+ * Change user password
+ */
 async function changePassword(oldPassword, newPassword) {
     try {
         const response = await authenticatedFetch(
-            'https://solosafe-backend.onrender.com/api/auth/change-password',
+            `${API_BASE_URL}/auth/change-password`,
             {
                 method: 'PUT',
                 body: JSON.stringify({ oldPassword, newPassword })
@@ -613,11 +821,20 @@ async function changePassword(oldPassword, newPassword) {
     }
 }
 
+/**
+ * Download user data as JSON
+ */
 function downloadUserData() {
     const user = getCurrentUser();
+    const trips = JSON.parse(localStorage.getItem('solosafe_trips') || '[]');
     
     const userData = {
-        user,
+        user: {
+            name: user.name,
+            email: user.email,
+            username: user.username
+        },
+        trips,
         exportDate: new Date().toISOString()
     };
     
@@ -708,32 +925,58 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================
-// GLOBAL FUNCTIONS (for HTML onclick handlers)
+// EXPORT GLOBAL FUNCTIONS
 // ========================
 
-window.toggleDarkMode = toggleDarkMode;
+// Authentication
+window.getAuthToken = getAuthToken;
+window.getCurrentUser = getCurrentUser;
+window.fetchUserProfile = fetchUserProfile;
+window.handleGoogleCallback = handleGoogleCallback;
+window.updateUserProfile = updateUserProfile;
+window.getWelcomeMessage = getWelcomeMessage;
 window.logout = logout;
+
+// API
+window.authenticatedFetch = authenticatedFetch;
+
+// Trips
+window.createTrip = createTrip;
+window.getAllTrips = getAllTrips;
+window.getCurrentTrip = getCurrentTrip;
+window.updateTrip = updateTrip;
+window.endTrip = endTrip;
+window.checkIn = checkIn;
+window.triggerSOS = triggerSOS;
+
+// Contacts
+window.addContact = addContact;
+window.removeContact = removeContact;
+
+// Location
+window.getCurrentLocation = getCurrentLocation;
+window.startLocationTracking = startLocationTracking;
+window.stopLocationTracking = stopLocationTracking;
+
+// Notifications
+window.requestNotificationPermission = requestNotificationPermission;
+window.sendNotification = sendNotification;
+window.showNotificationPrompt = showNotificationPrompt;
+window.acceptNotifications = acceptNotifications;
+window.dismissNotificationPrompt = dismissNotificationPrompt;
+
+// Sharing
+window.generateShareLink = generateShareLink;
+
+// Profile
+window.uploadProfilePicture = uploadProfilePicture;
+window.changePassword = changePassword;
+window.downloadUserData = downloadUserData;
+
+// UI
+window.toggleDarkMode = toggleDarkMode;
 window.toggleSidebar = toggleSidebar;
 window.showSidebar = showSidebar;
 window.closeSidebar = closeSidebar;
 window.toggleProfileDropdown = toggleProfileDropdown;
 window.showToast = showToast;
-window.getCurrentUser = getCurrentUser;
-window.uploadProfilePicture = uploadProfilePicture;
-window.changePassword = changePassword;
-window.downloadUserData = downloadUserData;
-window.requestNotificationPermission = requestNotificationPermission;
-window.acceptNotifications = acceptNotifications;
-window.dismissNotificationPrompt = dismissNotificationPrompt;
-window.getCurrentLocation = getCurrentLocation;
-window.startLocationTracking = startLocationTracking;
-window.stopLocationTracking = stopLocationTracking;
-window.checkIn = checkIn;
-window.triggerSOS = triggerSOS;
-window.endTrip = endTrip;
-window.generateShareLink = generateShareLink;
-window.authenticatedFetch = authenticatedFetch;
-window.getCurrentTrip = getCurrentTrip;
-window.createTrip = createTrip;
-window.addContact = addContact;
-window.removeContact = removeContact;

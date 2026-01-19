@@ -100,10 +100,10 @@
                         </div>
 
                         <!-- Google Sign Up -->
-                        <!-- <button type="button" class="btn btn-outline-secondary w-100 google-btn" id="googleSignup">
+                       <a href="https://solosafe-backend.onrender.com/api/auth/google" style="text-decoration: none;"><button type="button" class="btn btn-outline-secondary w-100 google-btn" id="googleSignup">
                             <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
                             Sign up with Google
-                        </button> -->
+                        </button> </a>
 
                         <!-- Login Link -->
                         <div class="text-center mt-4">
@@ -224,6 +224,13 @@ function resetButton(button) {
         
         body: JSON.stringify({ name: nameValue, email, password })
     });
+
+    const data = await response.json();
+
+        console.log(data);
+        if (data){
+            localStorage.setItem('solosafe_user', JSON.stringify(data));
+        }
     
     console.log("res", response);
     console.error(response);
@@ -241,12 +248,7 @@ function resetButton(button) {
         showToast(errorMessage, 'error');
         return;
     }
-    const data = await response.json();
-
-        console.log(data);
-        if (data){
-            localStorage.setItem('solosafe_user', JSON.stringify(data));
-        }
+    
 
         
 
@@ -268,13 +270,13 @@ function resetButton(button) {
         
 
         // Google OAuth Sign Up
-        googleSignupBtn.addEventListener('click', () => {
-    showToast('Redirecting to Google...', 'info');
-    // Google OAuth will handle session creation automatically
-    setTimeout(() => {
-        window.location.href = 'https://solosafe-backend.onrender.com/api/auth/google';
-    }, 1000);
-});
+//         googleSignupBtn.addEventListener('click', () => {
+//     showToast('Redirecting to Google...', 'info');
+//     // Google OAuth will handle session creation automatically
+//     setTimeout(() => {
+//         window.location.href = 'https://solosafe-backend.onrender.com/api/auth/google';
+//     }, 1000);
+// });
 
         // Initialize carousel with 4-second interval
         const carousel = new bootstrap.Carousel(document.getElementById('signupCarousel'), {

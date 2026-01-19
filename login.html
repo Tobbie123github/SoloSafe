@@ -66,10 +66,10 @@
                         </div>
 
                         <!-- Google Login -->
-                        <!-- <button type="button" class="btn btn-outline-secondary w-100 google-btn" id="googleLogin">
+                        <a href="https://solosafe-backend.onrender.com/api/auth/google" style="text-decoration: none;"><button type="button" class="btn btn-outline-secondary w-100 google-btn" id="googleLogin">
                             <img src="https://www.google.com/favicon.ico" alt="Google" class="google-icon">
                             Login with Google
-                        </button> -->
+                        </button> </a>
 
                         <!-- Sign Up Link -->
                         <div class="text-center mt-4">
@@ -239,13 +239,13 @@ form.addEventListener('submit', async (e) => {
 });
 
 // Google OAuth Login
-googleLoginBtn.addEventListener('click', () => {
-    showToast('Redirecting to Google...', 'info');
-    // Google OAuth will handle session creation automatically
-    setTimeout(() => {
-        window.location.href = 'https://solosafe-backend.onrender.com/api/auth/google';
-    }, 1000);
-});
+// googleLoginBtn.addEventListener('click', () => {
+//     showToast('Redirecting to Google...', 'info');
+//     // Google OAuth will handle session creation automatically
+//     setTimeout(() => {
+//         window.location.href = 'https://solosafe-backend.onrender.com/api/auth/google';
+//     }, 1000);
+// });
 
 // Forgot Password
 forgotPasswordForm.addEventListener('submit', async (e) => {
